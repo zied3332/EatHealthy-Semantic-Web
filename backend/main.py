@@ -67,3 +67,53 @@ async def get_foods():
             status_code=502,
             detail="Unable to retrieve food data from Fuseki",
         ) from exc
+
+DIETS_QUERY = """
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX eh: <http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#>
+
+SELECT DISTINCT ?regime ?type
+WHERE {
+    ?regime rdf:type ?type .
+    ?type rdfs:subClassOf* eh:RegimeAlimentaire .
+    FILTER(isIRI(?regime))
+}
+ORDER BY ?regime
+"""
+
+
+@app.get("/api/diets")
+async def get_diets():
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                FUSEKI_ENDPOINT,
+                data={"query": DIETS_QUERY},
+                headers={"Accept": "application/sparql-results+json"},
+            )
+            response.raise_for_status()
+
+        bindings = response.json()["results"]["bindings"]
+
+        diets = []
+        for row in bindings:
+            regime_uri = row["regime"]["value"]
+            type_uri = row["type"]["value"]
+
+            diets.append({
+                "uri": regime_uri,
+                "name": regime_uri.rsplit("#", 1)[-1],
+                "type": type_uri.rsplit("#", 1)[-1],
+            })
+
+        return {
+            "count": len(diets),
+            "diets": diets,
+        }
+
+    except (httpx.HTTPError, ValueError, KeyError) as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="Unable to retrieve dietary regimes from Fuseki",
+        ) from exc
