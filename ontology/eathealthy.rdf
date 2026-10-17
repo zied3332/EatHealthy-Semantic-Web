@@ -1,0 +1,799 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rdf:RDF xmlns:EatHealthy="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy/">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy" />
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#suggereRepas">
+        <owl:equivalentProperty rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recommandeRepas" />
+        <rdfs:comment xml:lang="fr">Propriété équivalente à recommandeRepas.</rdfs:comment>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#suggereAliment">
+        <owl:equivalentProperty rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recommandeAliment" />
+        <rdfs:comment xml:lang="fr">Propriété équivalente à recommandeAliment.</rdfs:comment>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aPourBeneficiaire">
+        <owl:equivalentProperty rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#pourPersonne" />
+        <rdfs:comment xml:lang="fr">Alias sémantique de pourPersonne; illustre owl:equivalentProperty.</rdfs:comment>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#regimeSuiviPar">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeAlimentaire" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#suitRegime" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estRestrictionDe">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RestrictionAlimentaire" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aRestriction" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estProfilDe">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSante" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aProfil" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estObjectifDe">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifSante" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aObjectif" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recommandationCompatibleAvecRegime">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeAlimentaire" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCompatibilite" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recommandationAdapteeAObjectif">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifSante" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCompatibilite" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recommandationAdapteeAuProfil">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSante" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCompatibilite" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#repasAdapteAObjectif">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifSante" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCompatibilite" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#repasCompatibleAvecRegime">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeAlimentaire" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCompatibilite" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#alternativeA">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#SymmetricProperty" />
+        <rdfs:comment xml:lang="fr">Relation symétrique entre deux aliments substituables.</rdfs:comment>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estInterditPour">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RestrictionAlimentaire" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#interditAliment" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estNutrimentDe">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Nutriment" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#contientNutriment" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#appartientARepas">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#contientAliment" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#eviteAliment">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#concernePersonne" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#prefereAliment">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#concernePersonne" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#consommeRepas">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#concernePersonne" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#consomme">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#concernePersonne" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#concernePersonne" />
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recommande">
+        <rdfs:comment xml:lang="fr">Super-propriété des recommandations d’aliments et de repas.</rdfs:comment>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aContenu" />
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCompatibilite" />
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCaracteristiqueSante">
+        <rdfs:comment xml:lang="fr">Super-propriété regroupant profil, objectif, restriction et régime d’une personne.</rdfs:comment>
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aImpact">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ImpactEnvironnemental" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aObjectif">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifSante" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCaracteristiqueSante" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estObjectifDe" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aProfil">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSante" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCaracteristiqueSante" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estProfilDe" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aRestriction">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RestrictionAlimentaire" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCaracteristiqueSante" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estRestrictionDe" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#contientAliment">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aContenu" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#appartientARepas" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#contientNutriment">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Nutriment" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aContenu" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estNutrimentDe" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#pourPersonne">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recoitRecommandation" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#concernePersonne" />
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty" />
+        <owl:equivalentProperty rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aPourBeneficiaire" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recommandeAliment">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recommande" />
+        <owl:equivalentProperty rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#suggereAliment" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recommandeRepas">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recommande" />
+        <owl:equivalentProperty rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#suggereRepas" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#suitRegime">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeAlimentaire" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCaracteristiqueSante" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#regimeSuiviPar" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#recoitRecommandation">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#pourPersonne" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#compatibleAvecProfil">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSante" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCompatibilite" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#interditAliment">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RestrictionAlimentaire" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estInterditPour" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#adapteAObjectif">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifSante" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCompatibilite" />
+    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#compatibleAvecRegime">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeAlimentaire" />
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCompatibilite" />
+    </owl:ObjectProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aAge">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCalories">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aEmpreinteCarbone">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aEmpreinteEau">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aGlucides">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aLipides">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aNom">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aPoids">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aProteines">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aTaille">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aFibres">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aSucre">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aSodium">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aDescription">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty" />
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation" />
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string" />
+    </owl:DatatypeProperty>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Adulte">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aAge" />
+                        <owl:someValuesFrom>
+                            <rdfs:Datatype>
+                                <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#integer" />
+                                <owl:withRestrictions rdf:parseType="Collection">
+                                    <rdf:Description>
+                                        <xsd:minInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">18</xsd:minInclusive>
+                                    </rdf:Description>
+                                    <rdf:Description>
+                                        <xsd:maxExclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">65</xsd:maxExclusive>
+                                    </rdf:Description>
+                                </owl:withRestrictions>
+                            </rdfs:Datatype>
+                        </owl:someValuesFrom>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#AlimentationEquilibree">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifSante" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Allergie">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RestrictionAlimentaire" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Cereale">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Collation">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Dejeuner">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Diner">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#EmpreinteCarbone">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ImpactEnvironnemental" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#EmpreinteEau">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ImpactEnvironnemental" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Enfant">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Fruit">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Glucide">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Nutriment" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ImpactEnvironnemental" />
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#InterdictionAlimentaire">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RestrictionAlimentaire" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Intolerance">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RestrictionAlimentaire" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Legume">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Lipide">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Nutriment" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#MaintienPoids">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifSante" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Mineral">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Nutriment" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Nutriment" />
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifSante" />
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Omnivore">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeAlimentaire" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#PertePoids">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifSante" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#PetitDejeuner">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Poisson">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#PriseMasse">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifSante" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProduitLaitier">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilActif">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSante" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSante" />
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSedentaire">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSante" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSportif">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSante" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Proteine">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Nutriment" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation" />
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeAlimentaire" />
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas" />
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RestrictionAlimentaire" />
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Saisonnalite">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ImpactEnvironnemental" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#SansGluten">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeAlimentaire" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Senior">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Vegan">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeAlimentaire" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Vegetarien">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeAlimentaire" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Viande">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment" />
+    </owl:Class>
+    <owl:Class rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Vitamine">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Nutriment" />
+    </owl:Class>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Dejeuner1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Dejeuner" />
+        <EatHealthy:contientAliment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Lentilles" />
+        <EatHealthy:contientAliment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Pomme" />
+        <EatHealthy:contientAliment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Saumon" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Glucide1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Glucide" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Lentilles">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Legume" />
+        <EatHealthy:contientNutriment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Glucide1" />
+        <EatHealthy:contientNutriment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Proteine1" />
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">116</EatHealthy:aCalories>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">20</EatHealthy:aGlucides>
+        <EatHealthy:aLipides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0.4</EatHealthy:aLipides>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">9</EatHealthy:aProteines>
+        <EatHealthy:compatibleAvecRegime rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeVegetarien1" />
+        <EatHealthy:compatibleAvecRegime rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeVegan1" />
+        <EatHealthy:adapteAObjectif rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifPriseMasse1" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifPriseMasse1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#PriseMasse" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Pomme">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Fruit" />
+        <EatHealthy:contientNutriment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Glucide1" />
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">52</EatHealthy:aCalories>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">14</EatHealthy:aGlucides>
+        <EatHealthy:aFibres rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.4</EatHealthy:aFibres>
+        <EatHealthy:aSucre rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">10.4</EatHealthy:aSucre>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSportif1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSportif" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Proteine1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Proteine" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation" />
+        <EatHealthy:pourPersonne rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Utilisateur1" />
+        <EatHealthy:recommandeAliment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Lentilles" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeOmnivore1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Omnivore" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Saumon">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Poisson" />
+        <EatHealthy:contientNutriment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Proteine1" />
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">208</EatHealthy:aCalories>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">20</EatHealthy:aProteines>
+        <EatHealthy:aLipides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">13</EatHealthy:aLipides>
+        <EatHealthy:aSodium rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">59</EatHealthy:aSodium>
+        <EatHealthy:compatibleAvecProfil rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSportif1" />
+        <EatHealthy:adapteAObjectif rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifPriseMasse1" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Utilisateur1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <EatHealthy:aObjectif rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifPriseMasse1" />
+        <EatHealthy:aProfil rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSportif1" />
+        <EatHealthy:suitRegime rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeOmnivore1" />
+        <EatHealthy:aAge rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">25</EatHealthy:aAge>
+        <EatHealthy:aNom>Utilisateur1</EatHealthy:aNom>
+        <EatHealthy:aPoids rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">75</EatHealthy:aPoids>
+        <EatHealthy:aTaille rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.84</EatHealthy:aTaille>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeVegetarien1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Vegetarien" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeVegan1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Vegan" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifPertePoids1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#PertePoids" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifMaintienPoids1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#MaintienPoids" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSedentaire1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSedentaire" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RestrictionSansGluten1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#SansGluten" />
+        <EatHealthy:interditAliment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#PainBlanc" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Banane">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Fruit" />
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">89</EatHealthy:aCalories>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">23</EatHealthy:aGlucides>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.1</EatHealthy:aProteines>
+        <EatHealthy:aFibres rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.6</EatHealthy:aFibres>
+        <EatHealthy:contientNutriment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Glucide1" />
+        <EatHealthy:adapteAObjectif rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifPriseMasse1" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Brocoli">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Legume" />
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">34</EatHealthy:aCalories>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">7</EatHealthy:aGlucides>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.8</EatHealthy:aProteines>
+        <EatHealthy:aFibres rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.6</EatHealthy:aFibres>
+        <EatHealthy:adapteAObjectif rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifPertePoids1" />
+        <EatHealthy:compatibleAvecRegime rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeVegetarien1" />
+        <EatHealthy:compatibleAvecRegime rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeVegan1" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Poulet">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Viande" />
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">165</EatHealthy:aCalories>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">31</EatHealthy:aProteines>
+        <EatHealthy:aLipides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">3.6</EatHealthy:aLipides>
+        <EatHealthy:contientNutriment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Proteine1" />
+        <EatHealthy:adapteAObjectif rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifPriseMasse1" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#PainBlanc">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Cereale" />
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">265</EatHealthy:aCalories>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">49</EatHealthy:aGlucides>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">9</EatHealthy:aProteines>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Utilisateur2">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne" />
+        <EatHealthy:aNom rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Sarra</EatHealthy:aNom>
+        <EatHealthy:aAge rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">32</EatHealthy:aAge>
+        <EatHealthy:aPoids rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">68</EatHealthy:aPoids>
+        <EatHealthy:aTaille rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">165</EatHealthy:aTaille>
+        <EatHealthy:aProfil rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ProfilSedentaire1" />
+        <EatHealthy:aObjectif rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ObjectifPertePoids1" />
+        <EatHealthy:aRestriction rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RestrictionSansGluten1" />
+        <EatHealthy:suitRegime rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#RegimeVegetarien1" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Diner1">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Diner" />
+        <EatHealthy:contientAliment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Brocoli" />
+        <EatHealthy:contientAliment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Lentilles" />
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation2">
+        <rdf:type rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation" />
+        <EatHealthy:aDescription rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Repas adapte a un objectif de perte de poids et a un regime vegetarien.</EatHealthy:aDescription>
+        <EatHealthy:pourPersonne rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Utilisateur2" />
+        <EatHealthy:recommandeAliment rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Brocoli" />
+        <EatHealthy:recommandeRepas rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Diner1" />
+    </owl:NamedIndividual>
+
+    <!-- FINAL DATA PROPERTY EXPANSION -->
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationPersonnelle">
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle">
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurEnvironnementale">
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationRecommandation">
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aIMC">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationPersonnelle"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aSexe">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationPersonnelle"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#niveauActivite">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationPersonnelle"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#besoinCaloriqueJournalier">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationPersonnelle"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#nombreRepasJour">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationPersonnelle"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#objectifCalories">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationPersonnelle"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Personne"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#prixMoyen">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#scoreNutritionnel">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estBio">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#estLocal">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#indiceSatiation">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Aliment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#empreinteTerre">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurEnvironnementale"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#ImpactEnvironnemental"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#scoreRecommandation">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationRecommandation"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#priorite">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationRecommandation"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#dateCreation">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationRecommandation"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#heureRecommandee">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Repas"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aNom"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationPersonnelle"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aAge"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationPersonnelle"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aPoids"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationPersonnelle"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aTaille"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationPersonnelle"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aCalories"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aProteines"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aGlucides"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aLipides"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aFibres"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aSucre"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aSodium"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurNutritionnelle"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aEmpreinteCarbone"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurEnvironnementale"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aEmpreinteEau"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#valeurEnvironnementale"/></owl:DatatypeProperty>
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#aDescription"><rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#informationRecommandation"/></owl:DatatypeProperty>
+
+    <!-- ILLUSTRATIVE DATA VALUES FOR EXISTING INDIVIDUALS -->
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Utilisateur1">
+        <EatHealthy:aNom rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Utilisateur 1</EatHealthy:aNom>
+        <EatHealthy:aAge rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">25</EatHealthy:aAge>
+        <EatHealthy:aPoids rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">72</EatHealthy:aPoids>
+        <EatHealthy:aTaille rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.84</EatHealthy:aTaille>
+        <EatHealthy:aIMC rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">21.27</EatHealthy:aIMC>
+        <EatHealthy:aSexe rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Homme</EatHealthy:aSexe>
+        <EatHealthy:niveauActivite rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Actif</EatHealthy:niveauActivite>
+        <EatHealthy:besoinCaloriqueJournalier rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2600</EatHealthy:besoinCaloriqueJournalier>
+        <EatHealthy:nombreRepasJour rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3</EatHealthy:nombreRepasJour>
+        <EatHealthy:objectifCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2850</EatHealthy:objectifCalories>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Utilisateur2">
+        <EatHealthy:aNom rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Utilisateur 2</EatHealthy:aNom>
+        <EatHealthy:aAge rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">30</EatHealthy:aAge>
+        <EatHealthy:aPoids rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">68</EatHealthy:aPoids>
+        <EatHealthy:aTaille rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.70</EatHealthy:aTaille>
+        <EatHealthy:aIMC rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">23.53</EatHealthy:aIMC>
+        <EatHealthy:aSexe rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Femme</EatHealthy:aSexe>
+        <EatHealthy:niveauActivite rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Modere</EatHealthy:niveauActivite>
+        <EatHealthy:besoinCaloriqueJournalier rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2100</EatHealthy:besoinCaloriqueJournalier>
+        <EatHealthy:nombreRepasJour rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3</EatHealthy:nombreRepasJour>
+        <EatHealthy:objectifCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1900</EatHealthy:objectifCalories>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Lentilles">
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">116</EatHealthy:aCalories>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">9</EatHealthy:aProteines>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">20</EatHealthy:aGlucides>
+        <EatHealthy:aLipides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0.4</EatHealthy:aLipides>
+        <EatHealthy:aFibres rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">8</EatHealthy:aFibres>
+        <EatHealthy:aSucre rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.8</EatHealthy:aSucre>
+        <EatHealthy:aSodium rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2</EatHealthy:aSodium>
+        <EatHealthy:prixMoyen rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.5</EatHealthy:prixMoyen>
+        <EatHealthy:scoreNutritionnel rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">8.8</EatHealthy:scoreNutritionnel>
+        <EatHealthy:estBio rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</EatHealthy:estBio>
+        <EatHealthy:estLocal rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</EatHealthy:estLocal>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Pomme">
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">52</EatHealthy:aCalories>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0.3</EatHealthy:aProteines>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">14</EatHealthy:aGlucides>
+        <EatHealthy:aLipides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0.2</EatHealthy:aLipides>
+        <EatHealthy:aFibres rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.4</EatHealthy:aFibres>
+        <EatHealthy:aSucre rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">10</EatHealthy:aSucre>
+        <EatHealthy:aSodium rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1</EatHealthy:aSodium>
+        <EatHealthy:prixMoyen rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.2</EatHealthy:prixMoyen>
+        <EatHealthy:scoreNutritionnel rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">7.5</EatHealthy:scoreNutritionnel>
+        <EatHealthy:estBio rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</EatHealthy:estBio>
+        <EatHealthy:estLocal rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</EatHealthy:estLocal>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Saumon">
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">208</EatHealthy:aCalories>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">20</EatHealthy:aProteines>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0</EatHealthy:aGlucides>
+        <EatHealthy:aLipides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">13</EatHealthy:aLipides>
+        <EatHealthy:aFibres rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0</EatHealthy:aFibres>
+        <EatHealthy:aSucre rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0</EatHealthy:aSucre>
+        <EatHealthy:aSodium rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">59</EatHealthy:aSodium>
+        <EatHealthy:prixMoyen rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">8.5</EatHealthy:prixMoyen>
+        <EatHealthy:scoreNutritionnel rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">8.2</EatHealthy:scoreNutritionnel>
+        <EatHealthy:estBio rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</EatHealthy:estBio>
+        <EatHealthy:estLocal rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</EatHealthy:estLocal>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Banane">
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">89</EatHealthy:aCalories>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.1</EatHealthy:aProteines>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">23</EatHealthy:aGlucides>
+        <EatHealthy:aLipides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0.3</EatHealthy:aLipides>
+        <EatHealthy:aFibres rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.6</EatHealthy:aFibres>
+        <EatHealthy:aSucre rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">12</EatHealthy:aSucre>
+        <EatHealthy:aSodium rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1</EatHealthy:aSodium>
+        <EatHealthy:prixMoyen rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.5</EatHealthy:prixMoyen>
+        <EatHealthy:scoreNutritionnel rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">7.8</EatHealthy:scoreNutritionnel>
+        <EatHealthy:estBio rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</EatHealthy:estBio>
+        <EatHealthy:estLocal rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</EatHealthy:estLocal>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Brocoli">
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">34</EatHealthy:aCalories>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.8</EatHealthy:aProteines>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">7</EatHealthy:aGlucides>
+        <EatHealthy:aLipides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0.4</EatHealthy:aLipides>
+        <EatHealthy:aFibres rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.6</EatHealthy:aFibres>
+        <EatHealthy:aSucre rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.7</EatHealthy:aSucre>
+        <EatHealthy:aSodium rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">33</EatHealthy:aSodium>
+        <EatHealthy:prixMoyen rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.0</EatHealthy:prixMoyen>
+        <EatHealthy:scoreNutritionnel rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">9.2</EatHealthy:scoreNutritionnel>
+        <EatHealthy:estBio rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</EatHealthy:estBio>
+        <EatHealthy:estLocal rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</EatHealthy:estLocal>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Poulet">
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">165</EatHealthy:aCalories>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">31</EatHealthy:aProteines>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0</EatHealthy:aGlucides>
+        <EatHealthy:aLipides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">3.6</EatHealthy:aLipides>
+        <EatHealthy:aFibres rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0</EatHealthy:aFibres>
+        <EatHealthy:aSucre rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0</EatHealthy:aSucre>
+        <EatHealthy:aSodium rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">74</EatHealthy:aSodium>
+        <EatHealthy:prixMoyen rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">6.5</EatHealthy:prixMoyen>
+        <EatHealthy:scoreNutritionnel rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">8.7</EatHealthy:scoreNutritionnel>
+        <EatHealthy:estBio rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</EatHealthy:estBio>
+        <EatHealthy:estLocal rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</EatHealthy:estLocal>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#PainBlanc">
+        <EatHealthy:aCalories rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">265</EatHealthy:aCalories>
+        <EatHealthy:aProteines rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">9</EatHealthy:aProteines>
+        <EatHealthy:aGlucides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">49</EatHealthy:aGlucides>
+        <EatHealthy:aLipides rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">3.2</EatHealthy:aLipides>
+        <EatHealthy:aFibres rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">2.7</EatHealthy:aFibres>
+        <EatHealthy:aSucre rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">5</EatHealthy:aSucre>
+        <EatHealthy:aSodium rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">491</EatHealthy:aSodium>
+        <EatHealthy:prixMoyen rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">1.8</EatHealthy:prixMoyen>
+        <EatHealthy:scoreNutritionnel rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">5.0</EatHealthy:scoreNutritionnel>
+        <EatHealthy:estBio rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">false</EatHealthy:estBio>
+        <EatHealthy:estLocal rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</EatHealthy:estLocal>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Dejeuner1">
+        <EatHealthy:heureRecommandee rdf:datatype="http://www.w3.org/2001/XMLSchema#string">12:30</EatHealthy:heureRecommandee>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Diner1">
+        <EatHealthy:heureRecommandee rdf:datatype="http://www.w3.org/2001/XMLSchema#string">19:30</EatHealthy:heureRecommandee>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation1">
+        <EatHealthy:aDescription rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Recommandation adaptee au profil et a objectif de utilisateur</EatHealthy:aDescription>
+        <EatHealthy:scoreRecommandation rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0.92</EatHealthy:scoreRecommandation>
+        <EatHealthy:priorite rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</EatHealthy:priorite>
+        <EatHealthy:dateCreation rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-04T00:00:00</EatHealthy:dateCreation>
+    </owl:NamedIndividual>
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#Recommandation2">
+        <EatHealthy:aDescription rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Recommandation alternative selon le regime alimentaire</EatHealthy:aDescription>
+        <EatHealthy:scoreRecommandation rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">0.87</EatHealthy:scoreRecommandation>
+        <EatHealthy:priorite rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</EatHealthy:priorite>
+        <EatHealthy:dateCreation rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-04T00:00:00</EatHealthy:dateCreation>
+    </owl:NamedIndividual>
+
+</rdf:RDF>
