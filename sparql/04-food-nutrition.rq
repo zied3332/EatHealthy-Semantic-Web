@@ -1,0 +1,17 @@
+PREFIX eh: <http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?aliment ?calories ?proteines ?glucides ?lipides
+WHERE {
+    ?aliment rdf:type ?type .
+    ?type rdfs:subClassOf* eh:Aliment .
+
+    OPTIONAL { ?aliment eh:aCalories ?calories . }
+    OPTIONAL { ?aliment eh:aProteines ?proteines . }
+    OPTIONAL { ?aliment eh:aGlucides ?glucides . }
+    OPTIONAL { ?aliment eh:aLipides ?lipides . }
+
+    FILTER(isIRI(?aliment))
+}
+ORDER BY ?aliment

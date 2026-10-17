@@ -1,0 +1,11 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX eh: <http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#>
+
+SELECT DISTINCT ?aliment ?type
+WHERE {
+    ?aliment rdf:type ?type .
+    ?type rdfs:subClassOf* eh:Aliment .
+    FILTER(isIRI(?aliment))
+}
+ORDER BY ?aliment
