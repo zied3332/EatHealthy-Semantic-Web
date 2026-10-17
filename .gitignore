@@ -1,0 +1,11 @@
+@"
+# Python
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# Node.js
+node_modules/
+dist/
+"@ | Set-Content .gitignore
