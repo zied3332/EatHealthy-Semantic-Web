@@ -6,7 +6,9 @@ import {
 } from "react-router-dom";
 
 import AppLayout from "./components/layout/AppLayout";
+import Home from "./pages/Home/Home";
 
+// Temporary page component for modules under development
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div>
@@ -21,26 +23,34 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
-          <Route
-            path="/"
-            element={<PlaceholderPage title="Welcome to EatHealthy" />}
-          />
+          {/* Home page */}
+          <Route path="/" element={<Home />} />
+
+          {/* Health profile */}
           <Route
             path="/profile"
             element={<PlaceholderPage title="My Profile" />}
           />
+
+          {/* Food Explorer */}
           <Route
             path="/foods"
             element={<PlaceholderPage title="Food Explorer" />}
           />
+
+          {/* Dietary Preferences */}
           <Route
             path="/diets"
             element={<PlaceholderPage title="Dietary Preferences" />}
           />
+
+          {/* Recommendations */}
           <Route
             path="/recommendations"
             element={<PlaceholderPage title="Recommendations" />}
           />
+
+          {/* AI Assistant */}
           <Route
             path="/assistant"
             element={<PlaceholderPage title="AI Assistant" />}
