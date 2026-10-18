@@ -14,20 +14,22 @@ import AppLayout from "./components/layout/AppLayout";
 // Home
 import Home from "./pages/Home/Home";
 
+// Health Profile - connected to FastAPI and Fuseki
+import Profile from "./pages/Profile/Profile";
+
 // Food Explorer
 import Foods from "./pages/Foods/Foods";
 
-// Food Details — semantic nutritional information
+// Food Details - semantic nutritional information
 import FoodDetails from "./pages/FoodDetails/FoodDetails";
 
-// Dietary Preferences — connected to FastAPI and Fuseki
+// Dietary Preferences - connected to FastAPI and Fuseki
 import Diets from "./pages/Diets/Diets";
 
 // ============================================================
 // TEMPORARY PLACEHOLDER
 // ============================================================
 
-// Used for modules that are still under development.
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div>
@@ -45,7 +47,6 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* All pages share the same application layout */}
         <Route element={<AppLayout />}>
 
           {/* HOME */}
@@ -57,9 +58,7 @@ function App() {
           {/* HEALTH PROFILE */}
           <Route
             path="/profile"
-            element={
-              <PlaceholderPage title="My Profile" />
-            }
+            element={<Profile />}
           />
 
           {/* FOOD EXPLORER */}
@@ -69,14 +68,12 @@ function App() {
           />
 
           {/* FOOD DETAILS */}
-          {/* Example: /foods/Pomme */}
           <Route
             path="/foods/:foodName"
             element={<FoodDetails />}
           />
 
           {/* DIETARY PREFERENCES */}
-          {/* Retrieves dietary regimes from Fuseki */}
           <Route
             path="/diets"
             element={<Diets />}
