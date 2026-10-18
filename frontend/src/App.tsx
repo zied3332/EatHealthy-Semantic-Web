@@ -7,11 +7,24 @@ import {
 
 import AppLayout from "./components/layout/AppLayout";
 
-// Pages
+// ============================================================
+// PAGES
+// ============================================================
+
+// Home
 import Home from "./pages/Home/Home";
+
+// Food Explorer
 import Foods from "./pages/Foods/Foods";
 
-// Temporary page component for modules under development
+// Food Details — semantic nutritional information
+import FoodDetails from "./pages/FoodDetails/FoodDetails";
+
+// ============================================================
+// TEMPORARY PLACEHOLDER
+// ============================================================
+
+// Used for modules that are still under development.
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div>
@@ -21,30 +34,45 @@ function PlaceholderPage({ title }: { title: string }) {
   );
 }
 
+// ============================================================
+// APPLICATION ROUTES
+// ============================================================
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* All pages share the same application layout */}
         <Route element={<AppLayout />}>
-          {/* Home page */}
+
+          {/* HOME */}
           <Route
             path="/"
             element={<Home />}
           />
 
-          {/* Health profile */}
+          {/* HEALTH PROFILE */}
           <Route
             path="/profile"
-            element={<PlaceholderPage title="My Profile" />}
+            element={
+              <PlaceholderPage title="My Profile" />
+            }
           />
 
-          {/* Food Explorer — connected to FastAPI */}
+          {/* FOOD EXPLORER */}
           <Route
             path="/foods"
             element={<Foods />}
           />
 
-          {/* Dietary Preferences */}
+          {/* FOOD DETAILS */}
+          {/* Example: /foods/Pomme */}
+          <Route
+            path="/foods/:foodName"
+            element={<FoodDetails />}
+          />
+
+          {/* DIETARY PREFERENCES */}
           <Route
             path="/diets"
             element={
@@ -52,7 +80,7 @@ function App() {
             }
           />
 
-          {/* Recommendations */}
+          {/* PERSONALIZED RECOMMENDATIONS */}
           <Route
             path="/recommendations"
             element={
@@ -60,13 +88,14 @@ function App() {
             }
           />
 
-          {/* AI Assistant */}
+          {/* AI ASSISTANT */}
           <Route
             path="/assistant"
             element={
               <PlaceholderPage title="AI Assistant" />
             }
           />
+
         </Route>
       </Routes>
     </BrowserRouter>
