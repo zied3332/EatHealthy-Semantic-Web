@@ -34,3 +34,22 @@ WHERE {
 }
 ORDER BY ?regime
 """
+
+
+# Retrieve all directly asserted RDF properties
+# for a specific food individual.
+#
+# The food identifier must be validated by the
+# backend before being inserted into this query.
+FOOD_DETAILS_QUERY = PREFIXES + """
+SELECT DISTINCT ?property ?value
+WHERE {
+    BIND(eh:{food_name} AS ?aliment)
+
+    ?aliment rdf:type ?type .
+    ?type rdfs:subClassOf* eh:Aliment .
+
+    ?aliment ?property ?value .
+}
+ORDER BY ?property ?value
+"""
