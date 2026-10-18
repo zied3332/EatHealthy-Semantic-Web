@@ -8,6 +8,15 @@ import {
 import AppLayout from "./components/layout/AppLayout";
 
 // ============================================================
+// CONTEXT PROVIDERS
+// ============================================================
+
+// Shared semantic user profile state.
+// Makes the selected user and their RDF relationships
+// available throughout the React application.
+import { ProfileProvider } from "./context/ProfileContext";
+
+// ============================================================
 // PAGES
 // ============================================================
 
@@ -30,6 +39,7 @@ import Diets from "./pages/Diets/Diets";
 // TEMPORARY PLACEHOLDER
 // ============================================================
 
+// Used for modules that are still under development.
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div>
@@ -46,57 +56,62 @@ function PlaceholderPage({ title }: { title: string }) {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<AppLayout />}>
+      {/* Shared profile data for all application pages */}
+      <ProfileProvider>
+        <Routes>
+          {/* All pages share the same application layout */}
+          <Route element={<AppLayout />}>
 
-          {/* HOME */}
-          <Route
-            path="/"
-            element={<Home />}
-          />
+            {/* HOME */}
+            <Route
+              path="/"
+              element={<Home />}
+            />
 
-          {/* HEALTH PROFILE */}
-          <Route
-            path="/profile"
-            element={<Profile />}
-          />
+            {/* HEALTH PROFILE */}
+            <Route
+              path="/profile"
+              element={<Profile />}
+            />
 
-          {/* FOOD EXPLORER */}
-          <Route
-            path="/foods"
-            element={<Foods />}
-          />
+            {/* FOOD EXPLORER */}
+            <Route
+              path="/foods"
+              element={<Foods />}
+            />
 
-          {/* FOOD DETAILS */}
-          <Route
-            path="/foods/:foodName"
-            element={<FoodDetails />}
-          />
+            {/* FOOD DETAILS */}
+            {/* Example: /foods/Pomme */}
+            <Route
+              path="/foods/:foodName"
+              element={<FoodDetails />}
+            />
 
-          {/* DIETARY PREFERENCES */}
-          <Route
-            path="/diets"
-            element={<Diets />}
-          />
+            {/* DIETARY PREFERENCES */}
+            <Route
+              path="/diets"
+              element={<Diets />}
+            />
 
-          {/* PERSONALIZED RECOMMENDATIONS */}
-          <Route
-            path="/recommendations"
-            element={
-              <PlaceholderPage title="Recommendations" />
-            }
-          />
+            {/* PERSONALIZED RECOMMENDATIONS */}
+            <Route
+              path="/recommendations"
+              element={
+                <PlaceholderPage title="Recommendations" />
+              }
+            />
 
-          {/* AI ASSISTANT */}
-          <Route
-            path="/assistant"
-            element={
-              <PlaceholderPage title="AI Assistant" />
-            }
-          />
+            {/* AI ASSISTANT */}
+            <Route
+              path="/assistant"
+              element={
+                <PlaceholderPage title="AI Assistant" />
+              }
+            />
 
-        </Route>
-      </Routes>
+          </Route>
+        </Routes>
+      </ProfileProvider>
     </BrowserRouter>
   );
 }
