@@ -35,11 +35,15 @@ import FoodDetails from "./pages/FoodDetails/FoodDetails";
 // Dietary Preferences - connected to FastAPI and Fuseki
 import Diets from "./pages/Diets/Diets";
 
+// Personalized Recommendations - SPARQL-powered food matching
+import Recommendations from "./pages/Recommendations/Recommendations";
+
 // ============================================================
 // TEMPORARY PLACEHOLDER
 // ============================================================
 
 // Used for modules that are still under development.
+// Currently only the AI Assistant uses this placeholder.
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div>
@@ -61,7 +65,6 @@ function App() {
         <Routes>
           {/* All pages share the same application layout */}
           <Route element={<AppLayout />}>
-
             {/* HOME */}
             <Route
               path="/"
@@ -94,21 +97,20 @@ function App() {
             />
 
             {/* PERSONALIZED RECOMMENDATIONS */}
+            {/* Uses the selected user from ProfileContext */}
             <Route
               path="/recommendations"
-              element={
-                <PlaceholderPage title="Recommendations" />
-              }
+              element={<Recommendations />}
             />
 
             {/* AI ASSISTANT */}
+            {/* Planned future module */}
             <Route
               path="/assistant"
               element={
                 <PlaceholderPage title="AI Assistant" />
               }
             />
-
           </Route>
         </Routes>
       </ProfileProvider>
