@@ -1,5 +1,4 @@
 
-import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -14,52 +13,26 @@ import {
   UserRound,
 } from "lucide-react";
 
-import api from "../../services/api";
+import {
+  useProfile,
+  type ProfileRelationship,
+} from "../../context/ProfileContext";
+
 import "./Profile.css";
 
 // ============================================================
 // TYPES
 // ============================================================
 
-interface ProfileOption {
-  uri: string;
-  name: string;
-  type: string;
-}
-
-interface ProfileOptionsResponse {
-  counts: {
-    persons: number;
-    activity_profiles: number;
-    health_goals: number;
-    restrictions: number;
-  };
-  persons: ProfileOption[];
-  activity_profiles: ProfileOption[];
-  health_goals: ProfileOption[];
-  restrictions: ProfileOption[];
-}
-
-interface SemanticRelationship {
-  person: string;
-  person_uri: string;
-  property: string;
-  property_uri: string;
-  value: string;
-  value_uri: string | null;
-  value_type: string;
-}
-
-interface RelationshipsResponse {
-  count: number;
-  relationships: SemanticRelationship[];
-}
-
 interface ProfileField {
   key: string;
   label: string;
   unit?: string;
 }
+
+// ============================================================
+// FIELD CONFIGURATION
+// ============================================================
 
 const personalFields: ProfileField[] = [
   { key: "aNom", label: "Name" },
@@ -100,6 +73,23 @@ const semanticFields: ProfileField[] = [
   { key: "eviteAliment", label: "Avoided foods" },
 ];
 
+// Properties normally expected to have one value.
+const singleValueProperties = [
+  "aNom",
+  "aAge",
+  "aSexe",
+  "aPoids",
+  "aTaille",
+  "aIMC",
+  "besoinCaloriqueJournalier",
+  "objectifCalories",
+  "nombreRepasJour",
+  "niveauActivite",
+  "aProfil",
+  "aObjectif",
+  "suitRegime",
+];
+
 // ============================================================
 // HELPERS
 // ============================================================
@@ -116,7 +106,7 @@ function readableName(value: string): string {
 }
 
 function getValues(
-  relationships: SemanticRelationship[],
+  relationships: ProfileRelationship[],
   property: string
 ): string[] {
   return Array.from(
@@ -129,14 +119,10 @@ function getValues(
 }
 
 function getDisplayValues(
-  relationships: SemanticRelationship[],
+  relationships: ProfileRelationship[],
   property: string
 ): string[] {
   const values = getValues(relationships, property);
-
-  if (property === "aNom") {
-    return values;
-  }
 
   if (
     [
@@ -154,6 +140,10 @@ function getDisplayValues(
   return values;
 }
 
+// ============================================================
+// PROFILE VALUE
+// ============================================================
+
 function ProfileValue({
   values,
   unit,
@@ -162,7 +152,11 @@ function ProfileValue({
   unit?: string;
 }) {
   if (values.length === 0) {
-    return <span className="profile-empty-value">Not recorded</span>;
+    return (
+      <span className="profile-empty-value">
+        Not recorded
+      </span>
+    );
   }
 
   return (
@@ -187,12 +181,16 @@ function ProfileValue({
   );
 }
 
+// ============================================================
+// FIELD GROUP
+// ============================================================
+
 function FieldGroup({
   fields,
   relationships,
 }: {
   fields: ProfileField[];
-  relationships: SemanticRelationship[];
+  relationships: ProfileRelationship[];
 }) {
   return (
     <div className="profile-fields">
@@ -220,99 +218,23 @@ function FieldGroup({
 // ============================================================
 
 export default function Profile() {
-  const [options, setOptions] =
-    useState<ProfileOptionsResponse | null>(null);
+  // All profile state now comes from the shared context.
+  const {
+    persons,
+    selectedPerson,
+    setSelectedPerson,
+    selectedRelationships,
+    loading,
+    error,
+    refreshProfile,
+  } = useProfile();
 
-  const [relationships, setRelationships] =
-    useState<SemanticRelationship[]>([]);
-
-  const [selectedPerson, setSelectedPerson] =
-    useState<string>("");
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  // ----------------------------------------------------------
-  // FETCH SEMANTIC DATA
-  // ----------------------------------------------------------
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadProfile() {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const [optionsResponse, relationshipsResponse] =
-          await Promise.all([
-            api.get<ProfileOptionsResponse>(
-              "/api/profile/options"
-            ),
-            api.get<RelationshipsResponse>(
-              "/api/profile/relationships"
-            ),
-          ]);
-
-        if (cancelled) return;
-
-        const nextOptions = optionsResponse.data;
-
-        setOptions(nextOptions);
-        setRelationships(
-          relationshipsResponse.data.relationships
-        );
-
-        setSelectedPerson((previous) => {
-          const exists = nextOptions.persons.some(
-            (person) => person.name === previous
-          );
-
-          return exists
-            ? previous
-            : nextOptions.persons[0]?.name ?? "";
-        });
-      } catch (err) {
-        if (cancelled) return;
-
-        console.error("Failed to load profile:", err);
-
-        setError(
-          "Unable to retrieve semantic profile data. Check FastAPI and Apache Jena Fuseki."
-        );
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    void loadProfile();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [refreshKey]);
-
-  // ----------------------------------------------------------
-  // SELECTED PERSON
-  // ----------------------------------------------------------
-
-  const personRelationships = useMemo(
-    () =>
-      relationships.filter(
-        (item) => item.person === selectedPerson
-      ),
-    [relationships, selectedPerson]
-  );
-
-  const selectedPersonOption = options?.persons.find(
+  const selectedPersonOption = persons.find(
     (person) => person.name === selectedPerson
   );
 
   const nameValues = getValues(
-    personRelationships,
+    selectedRelationships,
     "aNom"
   );
 
@@ -322,53 +244,42 @@ export default function Profile() {
       : selectedPerson;
 
   const goal = getDisplayValues(
-    personRelationships,
+    selectedRelationships,
     "aObjectif"
   );
 
   const activity = getDisplayValues(
-    personRelationships,
+    selectedRelationships,
     "aProfil"
   );
 
   const diet = getDisplayValues(
-    personRelationships,
+    selectedRelationships,
     "suitRegime"
   );
 
   const restrictions = getDisplayValues(
-    personRelationships,
+    selectedRelationships,
     "aRestriction"
   );
 
-  // Conflicts in fields normally expected to have one value.
-  const singleValueProperties = [
-    "aNom",
-    "aAge",
-    "aSexe",
-    "aPoids",
-    "aTaille",
-    "aIMC",
-    "besoinCaloriqueJournalier",
-    "objectifCalories",
-    "nombreRepasJour",
-    "niveauActivite",
-    "aProfil",
-    "aObjectif",
-    "suitRegime",
-  ];
+  const conflictingProperties =
+    singleValueProperties.filter(
+      (property) =>
+        getValues(
+          selectedRelationships,
+          property
+        ).length > 1
+    );
 
-  const conflictingProperties = singleValueProperties.filter(
-    (property) =>
-      getValues(personRelationships, property).length > 1
-  );
-
-  // ----------------------------------------------------------
+  // ==========================================================
   // RENDER
-  // ----------------------------------------------------------
+  // ==========================================================
 
   return (
     <main className="profile-page">
+      {/* HEADER */}
+
       <header className="profile-header">
         <div>
           <div className="profile-eyebrow">
@@ -379,16 +290,16 @@ export default function Profile() {
           <h1>My Health Profile</h1>
 
           <p>
-            Explore personal health information, nutritional
-            goals, and dietary preferences stored in the
-            EatHealthy knowledge graph.
+            Explore personal health information,
+            nutritional goals, and dietary preferences
+            stored in the EatHealthy knowledge graph.
           </p>
         </div>
 
         <button
           className="profile-refresh"
           type="button"
-          onClick={() => setRefreshKey((value) => value + 1)}
+          onClick={refreshProfile}
           disabled={loading}
         >
           <RefreshCw size={17} />
@@ -396,8 +307,10 @@ export default function Profile() {
         </button>
       </header>
 
+      {/* LOADING */}
+
       {loading && (
-        <div className="profile-state">
+        <div className="profile-state" role="status">
           <LoaderCircle
             className="profile-spinner"
             size={30}
@@ -406,25 +319,34 @@ export default function Profile() {
         </div>
       )}
 
+      {/* ERROR */}
+
       {!loading && error && (
-        <div className="profile-state profile-error">
+        <div
+          className="profile-state profile-error"
+          role="alert"
+        >
           <AlertTriangle size={28} />
+
           <h2>Connection error</h2>
+
           <p>{error}</p>
 
           <button
             type="button"
-            onClick={() =>
-              setRefreshKey((value) => value + 1)
-            }
+            onClick={refreshProfile}
           >
             Try again
           </button>
         </div>
       )}
 
-      {!loading && !error && options && (
+      {/* PROFILE CONTENT */}
+
+      {!loading && !error && (
         <>
+          {/* PERSON SELECTOR */}
+
           <section className="profile-selector-card">
             <div className="profile-selector-icon">
               <UserRound size={24} />
@@ -447,8 +369,15 @@ export default function Profile() {
               onChange={(event) =>
                 setSelectedPerson(event.target.value)
               }
+              disabled={persons.length === 0}
             >
-              {options.persons.map((person) => (
+              {persons.length === 0 && (
+                <option value="">
+                  No users available
+                </option>
+              )}
+
+              {persons.map((person) => (
                 <option
                   key={person.uri}
                   value={person.name}
@@ -461,6 +390,8 @@ export default function Profile() {
 
           {selectedPersonOption ? (
             <>
+              {/* PROFILE OVERVIEW */}
+
               <section className="profile-overview">
                 <div className="profile-avatar">
                   <UserRound size={36} />
@@ -482,6 +413,8 @@ export default function Profile() {
                 </span>
               </section>
 
+              {/* SUMMARY CARDS */}
+
               <div className="profile-summary-grid">
                 <article className="profile-summary-card">
                   <div className="profile-summary-icon">
@@ -489,6 +422,7 @@ export default function Profile() {
                   </div>
 
                   <span>Health goal</span>
+
                   <strong>
                     {goal.join(", ") || "Not recorded"}
                   </strong>
@@ -500,6 +434,7 @@ export default function Profile() {
                   </div>
 
                   <span>Activity profile</span>
+
                   <strong>
                     {activity.join(", ") || "Not recorded"}
                   </strong>
@@ -511,6 +446,7 @@ export default function Profile() {
                   </div>
 
                   <span>Dietary regime</span>
+
                   <strong>
                     {diet.join(", ") || "Not recorded"}
                   </strong>
@@ -522,16 +458,22 @@ export default function Profile() {
                   </div>
 
                   <span>Restrictions</span>
+
                   <strong>
-                    {restrictions.length
+                    {restrictions.length > 0
                       ? restrictions.join(", ")
                       : "None recorded"}
                   </strong>
                 </article>
               </div>
 
+              {/* DATA CONFLICT WARNING */}
+
               {conflictingProperties.length > 0 && (
-                <section className="profile-warning">
+                <section
+                  className="profile-warning"
+                  role="alert"
+                >
                   <AlertTriangle size={20} />
 
                   <div>
@@ -551,27 +493,33 @@ export default function Profile() {
                 </section>
               )}
 
+              {/* DETAILS */}
+
               <div className="profile-content-grid">
+                {/* PERSONAL INFORMATION */}
+
                 <section className="profile-panel">
                   <div className="profile-panel-heading">
                     <UserRound size={20} />
+
                     <div>
                       <h3>Personal Information</h3>
-                      <p>
-                        RDF datatype properties
-                      </p>
+                      <p>RDF datatype properties</p>
                     </div>
                   </div>
 
                   <FieldGroup
                     fields={personalFields}
-                    relationships={personRelationships}
+                    relationships={selectedRelationships}
                   />
                 </section>
+
+                {/* NUTRITION */}
 
                 <section className="profile-panel">
                   <div className="profile-panel-heading">
                     <HeartPulse size={20} />
+
                     <div>
                       <h3>Nutrition & Activity</h3>
                       <p>
@@ -582,13 +530,16 @@ export default function Profile() {
 
                   <FieldGroup
                     fields={nutritionFields}
-                    relationships={personRelationships}
+                    relationships={selectedRelationships}
                   />
                 </section>
+
+                {/* SEMANTIC RELATIONSHIPS */}
 
                 <section className="profile-panel profile-wide">
                   <div className="profile-panel-heading">
                     <Database size={20} />
+
                     <div>
                       <h3>Semantic Relationships</h3>
                       <p>
@@ -600,10 +551,12 @@ export default function Profile() {
 
                   <FieldGroup
                     fields={semanticFields}
-                    relationships={personRelationships}
+                    relationships={selectedRelationships}
                   />
                 </section>
               </div>
+
+              {/* FOOTER */}
 
               <section className="profile-footer">
                 <div>
@@ -612,7 +565,7 @@ export default function Profile() {
                   </strong>
 
                   <p>
-                    {personRelationships.length} RDF
+                    {selectedRelationships.length} RDF
                     property assertions retrieved for{" "}
                     {selectedPerson}.
                   </p>
@@ -624,8 +577,8 @@ export default function Profile() {
           ) : (
             <div className="profile-state">
               <p>
-                No Personne individuals were found in
-                the ontology.
+                No Personne individuals were found
+                in the ontology.
               </p>
             </div>
           )}
