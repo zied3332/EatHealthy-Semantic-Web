@@ -6,7 +6,10 @@ import {
 } from "react-router-dom";
 
 import AppLayout from "./components/layout/AppLayout";
+
+// Pages
 import Home from "./pages/Home/Home";
+import Foods from "./pages/Foods/Foods";
 
 // Temporary page component for modules under development
 function PlaceholderPage({ title }: { title: string }) {
@@ -24,7 +27,10 @@ function App() {
       <Routes>
         <Route element={<AppLayout />}>
           {/* Home page */}
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={<Home />}
+          />
 
           {/* Health profile */}
           <Route
@@ -32,28 +38,34 @@ function App() {
             element={<PlaceholderPage title="My Profile" />}
           />
 
-          {/* Food Explorer */}
+          {/* Food Explorer — connected to FastAPI */}
           <Route
             path="/foods"
-            element={<PlaceholderPage title="Food Explorer" />}
+            element={<Foods />}
           />
 
           {/* Dietary Preferences */}
           <Route
             path="/diets"
-            element={<PlaceholderPage title="Dietary Preferences" />}
+            element={
+              <PlaceholderPage title="Dietary Preferences" />
+            }
           />
 
           {/* Recommendations */}
           <Route
             path="/recommendations"
-            element={<PlaceholderPage title="Recommendations" />}
+            element={
+              <PlaceholderPage title="Recommendations" />
+            }
           />
 
           {/* AI Assistant */}
           <Route
             path="/assistant"
-            element={<PlaceholderPage title="AI Assistant" />}
+            element={
+              <PlaceholderPage title="AI Assistant" />
+            }
           />
         </Route>
       </Routes>
