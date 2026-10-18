@@ -1,9 +1,15 @@
 
+/* =========================================
+   EATHEALTHY — FOOD EXPLORER
+   ========================================= */
+
 .foods-page {
   max-width: 1400px;
   margin: 0 auto;
   color: #24352a;
 }
+
+/* PAGE HEADER */
 
 .foods-header {
   display: flex;
@@ -12,7 +18,11 @@
   gap: 24px;
   padding: 38px 42px;
   border-radius: 22px;
-  background: linear-gradient(120deg, #e6f6e8, #f5fbf1);
+  background: linear-gradient(
+    120deg,
+    #e6f6e8,
+    #f5fbf1
+  );
 }
 
 .foods-eyebrow {
@@ -51,6 +61,8 @@
   color: #298c4c;
 }
 
+/* SEARCH TOOLBAR */
+
 .foods-toolbar {
   display: flex;
   gap: 14px;
@@ -83,6 +95,20 @@
   font-size: 14px;
 }
 
+.foods-search-clear {
+  display: grid;
+  place-items: center;
+  padding: 5px;
+  border: none;
+  background: transparent;
+  color: #87998b;
+  cursor: pointer;
+}
+
+.foods-search-clear:hover {
+  color: #278b4d;
+}
+
 .foods-refresh {
   display: flex;
   align-items: center;
@@ -106,6 +132,107 @@
   cursor: not-allowed;
 }
 
+/* CATEGORY FILTERS */
+
+.foods-filter-section {
+  margin-top: 28px;
+}
+
+.foods-filter-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.foods-filter-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #415e49;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.foods-clear-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  color: #458b5b;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.foods-clear-filters:hover {
+  color: #1d6837;
+}
+
+.foods-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.foods-category-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #dce9de;
+  border-radius: 10px;
+  background: white;
+  color: #617b69;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.foods-category-btn:hover {
+  border-color: #8dc69e;
+  background: #f0f9f2;
+}
+
+.foods-category-btn.active {
+  border-color: #278b4d;
+  background: #278b4d;
+  color: white;
+}
+
+.foods-category-btn:focus-visible {
+  outline: 3px solid #a6dfb6;
+  outline-offset: 2px;
+}
+
+.foods-category-count {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: #edf5ef;
+  color: #4c9160;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.foods-category-btn.active .foods-category-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* RESULTS SUMMARY */
+
 .foods-summary {
   display: flex;
   align-items: center;
@@ -123,9 +250,14 @@
   font-weight: 400;
 }
 
+/* FOOD GRID */
+
 .foods-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(
+    3,
+    minmax(0, 1fr)
+  );
   gap: 19px;
   padding-bottom: 40px;
 }
@@ -138,7 +270,9 @@
   border: 1px solid #e5eee7;
   border-radius: 17px;
   background: white;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .food-card:hover {
@@ -201,6 +335,8 @@
   font-size: 11px;
 }
 
+/* LOADING / ERROR / EMPTY STATES */
+
 .foods-state {
   display: flex;
   flex-direction: column;
@@ -233,6 +369,10 @@
   cursor: pointer;
 }
 
+.foods-state button:hover {
+  background: #1d713c;
+}
+
 .foods-error {
   color: #a54b4b;
 }
@@ -247,9 +387,14 @@
   }
 }
 
+/* RESPONSIVE */
+
 @media (max-width: 1100px) {
   .foods-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
   }
 }
 
@@ -268,6 +413,18 @@
 
   .foods-refresh {
     min-height: 45px;
+  }
+
+  .foods-filter-heading {
+    align-items: flex-start;
+  }
+
+  .foods-categories {
+    gap: 8px;
+  }
+
+  .foods-category-btn {
+    padding: 9px 12px;
   }
 
   .foods-grid {
