@@ -1,5 +1,7 @@
 
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+
 import {
   Apple,
   ArrowRight,
@@ -270,9 +272,7 @@ export default function Foods() {
 
   return (
     <div className="foods-page">
-      {/* ============================
-          PAGE HEADER
-      ============================ */}
+      {/* PAGE HEADER */}
 
       <section className="foods-header">
         <div>
@@ -295,9 +295,7 @@ export default function Foods() {
         </div>
       </section>
 
-      {/* ============================
-          SEARCH AND REFRESH
-      ============================ */}
+      {/* SEARCH AND REFRESH */}
 
       <div className="foods-toolbar">
         <div className="foods-search">
@@ -336,9 +334,7 @@ export default function Foods() {
         </button>
       </div>
 
-      {/* ============================
-          CATEGORY FILTERS
-      ============================ */}
+      {/* CATEGORY FILTERS */}
 
       {!loading && !error && (
         <section className="foods-filter-section">
@@ -406,9 +402,7 @@ export default function Foods() {
         </section>
       )}
 
-      {/* ============================
-          RESULTS SUMMARY
-      ============================ */}
+      {/* RESULTS SUMMARY */}
 
       <div className="foods-summary">
         <Database size={17} />
@@ -426,15 +420,10 @@ export default function Foods() {
         </span>
       </div>
 
-      {/* ============================
-          LOADING STATE
-      ============================ */}
+      {/* LOADING STATE */}
 
       {loading && (
-        <div
-          className="foods-state"
-          role="status"
-        >
+        <div className="foods-state" role="status">
           <LoaderCircle
             className="foods-spinner"
             size={32}
@@ -449,9 +438,7 @@ export default function Foods() {
         </div>
       )}
 
-      {/* ============================
-          ERROR STATE
-      ============================ */}
+      {/* ERROR STATE */}
 
       {!loading && error && (
         <div
@@ -471,9 +458,7 @@ export default function Foods() {
         </div>
       )}
 
-      {/* ============================
-          EMPTY STATE
-      ============================ */}
+      {/* EMPTY STATE */}
 
       {!loading &&
         !error &&
@@ -500,18 +485,18 @@ export default function Foods() {
           </div>
         )}
 
-      {/* ============================
-          FOOD CARDS
-      ============================ */}
+      {/* FOOD CARDS */}
 
       {!loading &&
         !error &&
         filteredFoods.length > 0 && (
           <div className="foods-grid">
             {filteredFoods.map((food) => (
-              <article
+              <Link
+                to={`/foods/${encodeURIComponent(food.name)}`}
                 className="food-card"
                 key={food.id}
+                aria-label={`View details for ${food.name}`}
               >
                 <div className="food-card-top">
                   <div className="food-card-icon">
@@ -535,7 +520,7 @@ export default function Foods() {
 
                   <ArrowRight size={18} />
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         )}

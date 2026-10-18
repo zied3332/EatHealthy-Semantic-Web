@@ -435,3 +435,35 @@
     display: none;
   }
 }
+
+/* ============================================================
+   CLICKABLE FOOD CARDS
+   ============================================================ */
+
+/* Food cards are now React Router links. */
+.food-card {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Preserve the card's text styling. */
+.food-card:visited {
+  color: inherit;
+}
+
+/* Clear keyboard focus for accessibility. */
+.food-card:focus-visible {
+  outline: 3px solid #56b777;
+  outline-offset: 4px;
+}
+
+/* Highlight the arrow when hovering over a card. */
+.food-card-footer > svg {
+  transition: transform 0.2s ease;
+}
+
+.food-card:hover .food-card-footer > svg,
+.food-card:focus-visible .food-card-footer > svg {
+  transform: translateX(5px);
+}
