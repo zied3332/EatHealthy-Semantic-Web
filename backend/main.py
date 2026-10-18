@@ -9,12 +9,18 @@ Modules:
     - Foods: Food discovery and nutritional information.
     - Diets: Dietary regimes from the OWL ontology.
     - Profile: User profiles, health goals, and activity profiles.
+    - Recommendations: Personalized food recommendations using SPARQL.
 """
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.routers import foods, diets, profile
+from backend.routers import (
+    foods,
+    diets,
+    profile,
+    recommendations,
+)
 
 
 # ============================================================
@@ -23,8 +29,11 @@ from backend.routers import foods, diets, profile
 
 app = FastAPI(
     title="EatHealthy API",
-    description="Semantic nutrition API powered by Apache Jena Fuseki",
-    version="0.1.0",
+    description=(
+        "Semantic nutrition and personalized food recommendation "
+        "API powered by Apache Jena Fuseki"
+    ),
+    version="0.2.0",
 )
 
 
@@ -62,6 +71,9 @@ app.include_router(diets.router)
 # Semantic user profiles, goals, and activity profiles.
 app.include_router(profile.router)
 
+# Personalized food recommendations using SPARQL.
+app.include_router(recommendations.router)
+
 
 # ============================================================
 # GENERAL ENDPOINTS
@@ -76,5 +88,11 @@ def home():
     """
     return {
         "message": "Welcome to EatHealthy API",
-        "version": "0.1.0",
+        "version": "0.2.0",
+        "modules": [
+            "foods",
+            "diets",
+            "profile",
+            "recommendations",
+        ],
     }
