@@ -20,6 +20,9 @@ import Foods from "./pages/Foods/Foods";
 // Food Details — semantic nutritional information
 import FoodDetails from "./pages/FoodDetails/FoodDetails";
 
+// Dietary Preferences — connected to FastAPI and Fuseki
+import Diets from "./pages/Diets/Diets";
+
 // ============================================================
 // TEMPORARY PLACEHOLDER
 // ============================================================
@@ -73,11 +76,10 @@ function App() {
           />
 
           {/* DIETARY PREFERENCES */}
+          {/* Retrieves dietary regimes from Fuseki */}
           <Route
             path="/diets"
-            element={
-              <PlaceholderPage title="Dietary Preferences" />
-            }
+            element={<Diets />}
           />
 
           {/* PERSONALIZED RECOMMENDATIONS */}

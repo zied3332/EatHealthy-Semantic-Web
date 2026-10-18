@@ -1,0 +1,636 @@
+
+/* ============================================================
+   EATHEALTHY — DIETARY PREFERENCES
+   ============================================================ */
+
+.diets-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: 50px;
+  color: #24352a;
+}
+
+/* HEADER */
+
+.diets-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 38px 42px;
+  border-radius: 22px;
+  background: linear-gradient(
+    120deg,
+    #e6f6e8,
+    #f5fbf1
+  );
+}
+
+.diets-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 16px;
+  color: #2b9251;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.diets-header h1 {
+  margin: 0 0 13px;
+  font-size: clamp(28px, 3vw, 42px);
+  letter-spacing: -1.3px;
+}
+
+.diets-header p {
+  max-width: 590px;
+  margin: 0;
+  color: #708477;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.diets-header-icon {
+  display: grid;
+  place-items: center;
+  width: 86px;
+  height: 86px;
+  flex-shrink: 0;
+  border-radius: 24px;
+  background: #d3ebd8;
+  color: #298c4c;
+}
+
+/* TOOLBAR */
+
+.diets-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 28px 0 22px;
+}
+
+.diets-source {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #839488;
+  font-size: 12px;
+}
+
+.diets-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 17px;
+  border: 1px solid #dce9de;
+  border-radius: 10px;
+  background: #fff;
+  color: #328650;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.diets-refresh:hover:not(:disabled) {
+  background: #edf8ef;
+}
+
+.diets-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* MAIN LAYOUT */
+
+.diets-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  align-items: start;
+  gap: 24px;
+}
+
+.diets-main,
+.diets-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* PANELS */
+
+.diets-panel {
+  min-width: 0;
+  padding: 28px;
+  border: 1px solid #e5eee7;
+  border-radius: 19px;
+  background: #fff;
+  box-shadow: 0 5px 22px rgba(18, 61, 37, 0.035);
+}
+
+.diets-section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+.diets-section-kicker {
+  display: block;
+  margin-bottom: 9px;
+  color: #23915a;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.diets-panel h2 {
+  margin: 0 0 10px;
+  color: #193a2a;
+  font-size: 20px;
+  font-weight: 750;
+  letter-spacing: -0.5px;
+}
+
+.diets-section-heading p {
+  max-width: 530px;
+  margin: 0;
+  color: #7c8d83;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.diets-section-count {
+  flex-shrink: 0;
+  padding: 8px 11px;
+  border-radius: 8px;
+  background: #eef8f1;
+  color: #448b5d;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* DIET OPTIONS */
+
+.diets-options {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.diets-option {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  width: 100%;
+  padding: 19px;
+  border: 1px solid #e3ece5;
+  border-radius: 15px;
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+}
+
+.diets-option:hover {
+  border-color: #9dd0ac;
+  background: #f8fcf9;
+  transform: translateY(-2px);
+}
+
+.diets-option.selected {
+  border-color: #2b9655;
+  background: #f0faf3;
+}
+
+.diets-option:focus-visible,
+.diets-refresh:focus-visible,
+.diets-clear:focus-visible {
+  outline: 3px solid #a6dfb6;
+  outline-offset: 3px;
+}
+
+.diets-option-icon {
+  display: grid;
+  place-items: center;
+  width: 53px;
+  height: 53px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: #e8f6ec;
+  color: #2c9255;
+}
+
+.diets-option.selected .diets-option-icon {
+  background: #d6efdf;
+  color: #187b44;
+}
+
+.diets-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+}
+
+.diets-option-content strong {
+  color: #254a34;
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.diets-option-content > span {
+  color: #829187;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.diets-option-content small {
+  overflow-wrap: anywhere;
+  color: #a0ada4;
+  font-size: 10px;
+}
+
+.diets-option-check {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 2px solid #c9d9cd;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.diets-option.selected .diets-option-check {
+  border-color: #278b4d;
+  background: #278b4d;
+}
+
+/* RESTRICTION */
+
+.diets-restriction {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  padding: 19px;
+  border: 1px solid #e3ece5;
+  border-radius: 15px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.diets-restriction:hover {
+  border-color: #9dd0ac;
+}
+
+.diets-restriction.selected {
+  border-color: #2b9655;
+  background: #f0faf3;
+}
+
+.diets-restriction-icon {
+  display: grid;
+  place-items: center;
+  width: 53px;
+  height: 53px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: #f6f1e4;
+  color: #a5833c;
+}
+
+.diets-restriction-content {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+}
+
+.diets-restriction-content strong {
+  color: #254a34;
+  font-size: 16px;
+}
+
+.diets-restriction-content > span {
+  color: #829187;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.diets-restriction-content small {
+  overflow-wrap: anywhere;
+  color: #a0ada4;
+  font-size: 10px;
+}
+
+.diets-restriction input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.diets-restriction:focus-within {
+  outline: 3px solid #a6dfb6;
+  outline-offset: 3px;
+}
+
+.diets-checkbox {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 2px solid #c9d9cd;
+  border-radius: 7px;
+  color: #fff;
+}
+
+.diets-restriction.selected .diets-checkbox {
+  border-color: #278b4d;
+  background: #278b4d;
+}
+
+/* SUMMARY */
+
+.diets-summary-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 23px;
+  color: #298d54;
+}
+
+.diets-summary-heading h2 {
+  margin: 0;
+}
+
+.diets-summary-heading .diets-section-kicker {
+  margin-bottom: 5px;
+}
+
+.diets-summary-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 25px;
+  border-radius: 13px;
+  background: #eef9f1;
+}
+
+.diets-summary-count strong {
+  color: #22864d;
+  font-size: 38px;
+  font-weight: 800;
+}
+
+.diets-summary-count span {
+  color: #6c9277;
+  font-size: 12px;
+}
+
+.diets-summary-list {
+  margin-top: 20px;
+}
+
+.diets-summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #edf1ee;
+}
+
+.diets-summary-item span {
+  color: #809086;
+  font-size: 12px;
+}
+
+.diets-summary-item strong {
+  color: #254a34;
+  font-size: 12px;
+  text-align: right;
+}
+
+.diets-clear {
+  width: 100%;
+  margin-top: 22px;
+  padding: 12px;
+  border: 1px solid #dce9de;
+  border-radius: 10px;
+  background: #fff;
+  color: #388955;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.diets-clear:hover {
+  background: #f0f8f2;
+}
+
+.diets-summary-note {
+  margin: 18px 0 0;
+  color: #95a398;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* ONTOLOGY INFORMATION */
+
+.diets-ontology-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 13px;
+  color: #29915a;
+}
+
+.diets-ontology-heading h2 {
+  margin: 0;
+}
+
+.diets-ontology-panel > p {
+  margin: 0 0 18px;
+  color: #839288;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.diets-ontology-stat {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf1ee;
+  color: #829187;
+  font-size: 12px;
+}
+
+.diets-ontology-stat strong {
+  color: #2c7750;
+  font-size: 13px;
+}
+
+.diets-ontology-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  color: #318e55;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.diets-empty {
+  padding: 30px;
+  border: 1px dashed #dce9e0;
+  border-radius: 12px;
+  color: #8b9a90;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* LOADING / ERROR */
+
+.diets-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 340px;
+  padding: 35px;
+  border: 1px solid #e4eee7;
+  border-radius: 20px;
+  background: #fff;
+  color: #368c5c;
+  text-align: center;
+}
+
+.diets-state h2 {
+  margin: 0;
+  color: #254835;
+  font-size: 21px;
+}
+
+.diets-state p {
+  max-width: 450px;
+  margin: 0;
+  color: #87988c;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.diets-error {
+  color: #b85b5b;
+}
+
+.diets-state button {
+  margin-top: 12px;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 9px;
+  background: #278b4d;
+  color: #fff;
+  cursor: pointer;
+}
+
+.diets-spinner {
+  animation: diets-spin 1s linear infinite;
+}
+
+@keyframes diets-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+  .diets-layout {
+    grid-template-columns: minmax(0, 1fr) 270px;
+  }
+}
+
+@media (max-width: 900px) {
+  .diets-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .diets-sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+@media (max-width: 650px) {
+  .diets-header {
+    padding: 30px 24px;
+  }
+
+  .diets-header-icon {
+    display: none;
+  }
+
+  .diets-toolbar {
+    align-items: flex-start;
+  }
+
+  .diets-panel {
+    padding: 20px;
+  }
+
+  .diets-section-heading {
+    flex-direction: column;
+  }
+
+  .diets-option,
+  .diets-restriction {
+    gap: 12px;
+    padding: 15px;
+  }
+
+  .diets-option-icon,
+  .diets-restriction-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .diets-sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .diets-sidebar > * {
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .diets-option-icon,
+  .diets-restriction-icon {
+    display: none;
+  }
+}
