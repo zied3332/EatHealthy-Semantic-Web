@@ -4,13 +4,22 @@ EatHealthy API - Main Application.
 
 Initializes FastAPI, configures CORS,
 and registers the application routers.
+
+Modules:
+    - Foods: Food discovery and nutritional information.
+    - Diets: Dietary regimes from the OWL ontology.
+    - Profile: User profiles, health goals, and activity profiles.
 """
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.routers import foods, diets
+from backend.routers import foods, diets, profile
 
+
+# ============================================================
+# FASTAPI APPLICATION
+# ============================================================
 
 app = FastAPI(
     title="EatHealthy API",
@@ -19,8 +28,13 @@ app = FastAPI(
 )
 
 
+# ============================================================
+# CORS CONFIGURATION
+# ============================================================
+
 # Allow the React development frontend to access the API.
 # Vite may use a different port when 5173 is occupied.
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -35,13 +49,31 @@ app.add_middleware(
 )
 
 
-# Register application modules.
+# ============================================================
+# API ROUTERS
+# ============================================================
+
+# Food Explorer and Food Details.
 app.include_router(foods.router)
+
+# Dietary preferences and regimes.
 app.include_router(diets.router)
 
+# Semantic user profiles, goals, and activity profiles.
+app.include_router(profile.router)
+
+
+# ============================================================
+# GENERAL ENDPOINTS
+# ============================================================
 
 @app.get("/", tags=["General"])
 def home():
+    """
+    API health and welcome endpoint.
+
+    Provides basic application information.
+    """
     return {
         "message": "Welcome to EatHealthy API",
         "version": "0.1.0",
