@@ -4,22 +4,24 @@ import { Link } from "react-router-dom";
 
 import {
   Apple,
+  ArrowDownAZ,
   ArrowRight,
   Database,
   LoaderCircle,
   RefreshCw,
   Search,
-  Sprout,
   SlidersHorizontal,
+  Sprout,
   X,
 } from "lucide-react";
 
 import api from "../../services/api";
 import "./Foods.css";
 
-/**
- * Normalized food object used by the frontend.
- */
+// ============================================================
+// TYPES
+// ============================================================
+
 type Food = {
   id: string;
   name: string;
@@ -29,10 +31,15 @@ type Food = {
 
 type ApiFood = Record<string, unknown>;
 
-/**
- * Read a value from a regular JSON field
- * or a SPARQL binding object.
- */
+type SortOption =
+  | "name-asc"
+  | "name-desc"
+  | "category";
+
+// ============================================================
+// DATA HELPERS
+// ============================================================
+
 function readValue(value: unknown): string {
   if (typeof value === "string") {
     return value;
@@ -55,18 +62,25 @@ function readValue(value: unknown): string {
   return "";
 }
 
-/**
- * Extract the local name from an RDF URI.
- */
 function localName(value: string): string {
   const cleanValue = value.split("#").pop() ?? value;
   return cleanValue.split("/").pop() ?? cleanValue;
 }
 
 /**
- * Convert a backend food object into
- * the format expected by React.
+ * Convert ontology identifiers into readable labels.
+ *
+ * Example:
+ *   PainBlanc -> Pain Blanc
+ *   RegimeVegetarien -> Regime Vegetarien
  */
+function readableName(value: string): string {
+  return value
+    .replace(/_/g, " ")
+    .replace(/([a-zà-ÿ])([A-Z])/g, "$1 $2")
+    .trim();
+}
+
 function normalizeFood(
   item: ApiFood,
   index: number
@@ -105,15 +119,14 @@ function normalizeFood(
 }
 
 /**
- * Support the EatHealthy API response:
+ * Supports the EatHealthy API response:
  *
  * {
  *   count: 7,
  *   foods: [...]
  * }
  *
- * Also supports simple arrays and
- * SPARQL-style results.
+ * Also supports arrays and SPARQL bindings.
  */
 function extractFoods(data: unknown): Food[] {
   let items: unknown = data;
@@ -158,9 +171,10 @@ function extractFoods(data: unknown): Food[] {
     .map(normalizeFood);
 }
 
-/**
- * Main Food Explorer page.
- */
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
+
 export default function Foods() {
   // Data
   const [foods, setFoods] = useState<Food[]>([]);
@@ -170,15 +184,19 @@ export default function Foods() {
   const [selectedCategory, setSelectedCategory] =
     useState("All");
 
+  // Sorting
+  const [sortBy, setSortBy] =
+    useState<SortOption>("name-asc");
+
   // API state
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(
-    null
-  );
+  const [error, setError] =
+    useState<string | null>(null);
 
-  /**
-   * Fetch foods from FastAPI.
-   */
+  // ==========================================================
+  // LOAD FOODS
+  // ==========================================================
+
   async function loadFoods() {
     setLoading(true);
     setError(null);
@@ -205,17 +223,14 @@ export default function Foods() {
     }
   }
 
-  /**
-   * Load ontology foods when the page mounts.
-   */
   useEffect(() => {
     void loadFoods();
   }, []);
 
-  /**
-   * Dynamically generate categories from
-   * the food data returned by the API.
-   */
+  // ==========================================================
+  // CATEGORIES
+  // ==========================================================
+
   const categories = useMemo(() => {
     const uniqueCategories = [
       ...new Set(
@@ -227,19 +242,25 @@ export default function Foods() {
       "All",
       ...uniqueCategories
         .filter((category) => category !== "All")
-        .sort(),
+        .sort((a, b) =>
+          a.localeCompare(b)
+        ),
     ];
   }, [foods]);
 
-  /**
-   * Apply search and category filters together.
-   */
+  // ==========================================================
+  // SEARCH + FILTER + SORT
+  // ==========================================================
+
   const filteredFoods = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return foods.filter((food) => {
+    const result = foods.filter((food) => {
       const matchesSearch =
         food.name.toLowerCase().includes(query) ||
+        readableName(food.name)
+          .toLowerCase()
+          .includes(query) ||
         food.category
           .toLowerCase()
           .includes(query) ||
@@ -253,26 +274,55 @@ export default function Foods() {
 
       return matchesSearch && matchesCategory;
     });
-  }, [foods, search, selectedCategory]);
 
-  /**
-   * Check whether filters are active.
-   */
+    result.sort((a, b) => {
+      if (sortBy === "name-desc") {
+        return b.name.localeCompare(a.name);
+      }
+
+      if (sortBy === "category") {
+        return (
+          a.category.localeCompare(b.category) ||
+          a.name.localeCompare(b.name)
+        );
+      }
+
+      return a.name.localeCompare(b.name);
+    });
+
+    return result;
+  }, [
+    foods,
+    search,
+    selectedCategory,
+    sortBy,
+  ]);
+
+  // ==========================================================
+  // FILTER HELPERS
+  // ==========================================================
+
   const hasActiveFilters =
     search.trim() !== "" ||
     selectedCategory !== "All";
 
-  /**
-   * Reset search and category filters.
-   */
   function clearFilters() {
     setSearch("");
     setSelectedCategory("All");
   }
 
+  function resetExplorer() {
+    clearFilters();
+    setSortBy("name-asc");
+  }
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
   return (
     <div className="foods-page">
-      {/* PAGE HEADER */}
+      {/* HEADER */}
 
       <section className="foods-header">
         <div>
@@ -284,9 +334,9 @@ export default function Foods() {
           <h1>Explore Healthy Foods</h1>
 
           <p>
-            Discover foods stored in the EatHealthy
-            knowledge graph and explore semantic
-            nutrition data.
+            Discover foods stored in the
+            EatHealthy knowledge graph and
+            explore semantic nutrition data.
           </p>
         </div>
 
@@ -295,7 +345,7 @@ export default function Foods() {
         </div>
       </section>
 
-      {/* SEARCH AND REFRESH */}
+      {/* SEARCH + REFRESH */}
 
       <div className="foods-toolbar">
         <div className="foods-search">
@@ -334,7 +384,7 @@ export default function Foods() {
         </button>
       </div>
 
-      {/* CATEGORY FILTERS */}
+      {/* FILTERS */}
 
       {!loading && !error && (
         <section className="foods-filter-section">
@@ -389,7 +439,7 @@ export default function Foods() {
                   <span>
                     {category === "All"
                       ? "All Foods"
-                      : category}
+                      : readableName(category)}
                   </span>
 
                   <span className="foods-category-count">
@@ -398,6 +448,63 @@ export default function Foods() {
                 </button>
               );
             })}
+          </div>
+
+          {/* SORTING */}
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "12px",
+              marginTop: "20px",
+            }}
+          >
+            <label
+              htmlFor="foods-sort"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontWeight: 600,
+              }}
+            >
+              <ArrowDownAZ size={18} />
+              Sort foods
+            </label>
+
+            <select
+              id="foods-sort"
+              value={sortBy}
+              onChange={(event) =>
+                setSortBy(
+                  event.target.value as SortOption
+                )
+              }
+              style={{
+                padding: "10px 14px",
+                borderRadius: "12px",
+                border: "1px solid #d4dfd5",
+                background: "#fff",
+                color: "#263d2e",
+                fontSize: "14px",
+                cursor: "pointer",
+              }}
+            >
+              <option value="name-asc">
+                Name: A to Z
+              </option>
+
+              <option value="name-desc">
+                Name: Z to A
+              </option>
+
+              <option value="category">
+                Category
+              </option>
+            </select>
           </div>
         </section>
       )}
@@ -415,15 +522,26 @@ export default function Foods() {
               : `${filteredFoods.length} of ${foods.length} foods`}
         </span>
 
+        {!loading && !error && (
+          <span>
+            {selectedCategory === "All"
+              ? "All categories"
+              : readableName(selectedCategory)}
+          </span>
+        )}
+
         <span className="foods-source">
           Source: EatHealthy Ontology
         </span>
       </div>
 
-      {/* LOADING STATE */}
+      {/* LOADING */}
 
       {loading && (
-        <div className="foods-state" role="status">
+        <div
+          className="foods-state"
+          role="status"
+        >
           <LoaderCircle
             className="foods-spinner"
             size={32}
@@ -438,7 +556,7 @@ export default function Foods() {
         </div>
       )}
 
-      {/* ERROR STATE */}
+      {/* ERROR */}
 
       {!loading && error && (
         <div
@@ -477,9 +595,9 @@ export default function Foods() {
             {hasActiveFilters && (
               <button
                 type="button"
-                onClick={clearFilters}
+                onClick={resetExplorer}
               >
-                Clear Filters
+                Reset Explorer
               </button>
             )}
           </div>
@@ -493,10 +611,14 @@ export default function Foods() {
           <div className="foods-grid">
             {filteredFoods.map((food) => (
               <Link
-                to={`/foods/${encodeURIComponent(food.name)}`}
+                to={`/foods/${encodeURIComponent(
+                  food.name
+                )}`}
                 className="food-card"
                 key={food.id}
-                aria-label={`View details for ${food.name}`}
+                aria-label={`View details for ${
+                  readableName(food.name)
+                }`}
               >
                 <div className="food-card-top">
                   <div className="food-card-icon">
@@ -504,11 +626,11 @@ export default function Foods() {
                   </div>
 
                   <span className="food-card-category">
-                    {food.category}
+                    {readableName(food.category)}
                   </span>
                 </div>
 
-                <h2>{food.name}</h2>
+                <h2>{readableName(food.name)}</h2>
 
                 <p>{food.description}</p>
 
