@@ -49,6 +49,13 @@ interface NutritionField {
   className: string;
 }
 
+type SemanticGroup = {
+  title: string;
+  description: string;
+  icon: typeof Leaf;
+  relations: FoodProperty[];
+};
+
 // ============================================================
 // NUTRITION CONFIGURATION
 // ============================================================
@@ -109,6 +116,9 @@ const nutritionFields: NutritionField[] = [
 // HELPERS
 // ============================================================
 
+/**
+ * Return all properties with the specified RDF predicate.
+ */
 function getProperties(
   properties: FoodProperty[],
   propertyName: string
@@ -118,30 +128,58 @@ function getProperties(
   );
 }
 
+/**
+ * Return the first value of a property, if available.
+ */
 function getFirstValue(
   properties: FoodProperty[],
   propertyName: string
 ): string | null {
-  return getProperties(properties, propertyName)[0]?.value ?? null;
+  return (
+    getProperties(properties, propertyName)[0]?.value ??
+    null
+  );
 }
 
+/**
+ * Parse RDF boolean literals without assuming
+ * missing information means false.
+ */
 function getBooleanValue(
   properties: FoodProperty[],
   propertyName: string
 ): boolean | null {
-  const value = getFirstValue(properties, propertyName);
+  const value = getFirstValue(
+    properties,
+    propertyName
+  );
 
-  if (value === null) return null;
-  if (value.toLowerCase() === "true") return true;
-  if (value.toLowerCase() === "false") return false;
+  if (value === null) {
+    return null;
+  }
+
+  if (value.toLowerCase() === "true") {
+    return true;
+  }
+
+  if (value.toLowerCase() === "false") {
+    return false;
+  }
 
   return null;
 }
 
+/**
+ * Format numerical RDF literals for display.
+ * Does not infer units or serving sizes.
+ */
 function formatValue(value: string): string {
   const number = Number(value);
 
-  if (value.trim() !== "" && Number.isFinite(number)) {
+  if (
+    value.trim() !== "" &&
+    Number.isFinite(number)
+  ) {
     return number.toLocaleString("en-US", {
       maximumFractionDigits: 3,
     });
@@ -150,26 +188,159 @@ function formatValue(value: string): string {
   return value;
 }
 
+/**
+ * Convert RDF predicate names into readable labels.
+ *
+ * Example:
+ *   compatibleAvecRegime -> Compatible Avec Regime
+ */
 function formatPropertyName(value: string): string {
   return value
     .replace(/^a(?=[A-Z])/, "")
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/^./, (letter) => letter.toUpperCase());
+    .replace(/_/g, " ")
+    .replace(/([a-zà-ÿ])([A-Z])/g, "$1 $2")
+    .replace(/^./, (letter) =>
+      letter.toUpperCase()
+    );
+}
+
+/**
+ * Extract the local name from an RDF URI.
+ */
+function localName(value: string): string {
+  const afterHash = value.split("#").pop() ?? value;
+
+  return (
+    afterHash.split("/").pop() ??
+    afterHash
+  );
+}
+
+/**
+ * Make ontology resource identifiers readable.
+ *
+ * Examples:
+ *   RegimeVegetarien1 -> Vegetarien
+ *   ObjectifPertePoids1 -> Perte Poids
+ *   ProfilSportif1 -> Sportif
+ *
+ * Only changes the visible label.
+ * The original RDF identifier is preserved.
+ */
+function readableResourceName(value: string): string {
+  return localName(value)
+    .replace(/^Regime/, "")
+    .replace(/^Objectif/, "")
+    .replace(/^Profil/, "")
+    .replace(/(\d+)$/, "")
+    .replace(/_/g, " ")
+    .replace(/([a-zà-ÿ])([A-Z])/g, "$1 $2")
+    .trim();
+}
+
+/**
+ * Build semantic groups from explicit URI relationships.
+ *
+ * This does not infer compatibility.
+ * A missing relationship remains unknown.
+ */
+function groupSemanticRelations(
+  properties: FoodProperty[]
+): SemanticGroup[] {
+  const relations = properties.filter(
+    (item) =>
+      item.value_type === "uri" &&
+      item.property !== "type"
+  );
+
+  const dietPredicates = [
+    "compatibleAvecRegime",
+    "estCompatibleAvecRegime",
+  ];
+
+  const goalPredicates = [
+    "adapteAObjectif",
+    "estAdapteAObjectif",
+  ];
+
+  const profilePredicates = [
+    "compatibleAvecProfil",
+    "estCompatibleAvecProfil",
+  ];
+
+  const knownPredicates = [
+    ...dietPredicates,
+    ...goalPredicates,
+    ...profilePredicates,
+  ];
+
+  return [
+    {
+      title: "Compatible dietary regimes",
+      description:
+        "Dietary regimes explicitly linked to this food.",
+      icon: Leaf,
+      relations: relations.filter((item) =>
+        dietPredicates.includes(item.property)
+      ),
+    },
+    {
+      title: "Health goals",
+      description:
+        "Health objectives explicitly associated with this food.",
+      icon: Sprout,
+      relations: relations.filter((item) =>
+        goalPredicates.includes(item.property)
+      ),
+    },
+    {
+      title: "Activity profiles",
+      description:
+        "Activity profiles explicitly associated with this food.",
+      icon: ShieldCheck,
+      relations: relations.filter((item) =>
+        profilePredicates.includes(item.property)
+      ),
+    },
+    {
+      title: "Other RDF relationships",
+      description:
+        "Additional semantic connections in the ontology.",
+      icon: Database,
+      relations: relations.filter(
+        (item) =>
+          !knownPredicates.includes(item.property)
+      ),
+    },
+  ];
 }
 
 // ============================================================
-// COMPONENT
+// MAIN COMPONENT
 // ============================================================
 
 export default function FoodDetails() {
-  const { foodName } = useParams<{ foodName: string }>();
+  const { foodName } = useParams<{
+    foodName: string;
+  }>();
 
-  const [food, setFood] = useState<FoodDetailsResponse | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
+  // ----------------------------------------------------------
+  // STATE
+  // ----------------------------------------------------------
+
+  const [
+    food,
+    setFood,
+  ] = useState<FoodDetailsResponse | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  const [reloadKey, setReloadKey] =
+    useState(0);
 
   // ----------------------------------------------------------
   // FETCH FOOD DETAILS
@@ -181,7 +352,9 @@ export default function FoodDetails() {
     async function loadFood() {
       if (!foodName) {
         setFood(null);
-        setError("No food identifier was provided.");
+        setError(
+          "No food identifier was provided."
+        );
         setLoading(false);
         return;
       }
@@ -191,15 +364,20 @@ export default function FoodDetails() {
       setFood(null);
 
       try {
-        const response = await api.get<FoodDetailsResponse>(
-          `/api/foods/${encodeURIComponent(foodName)}`
-        );
+        const response =
+          await api.get<FoodDetailsResponse>(
+            `/api/foods/${encodeURIComponent(
+              foodName
+            )}`
+          );
 
         if (active) {
           setFood(response.data);
         }
       } catch (err: unknown) {
-        if (!active) return;
+        if (!active) {
+          return;
+        }
 
         let message =
           "Unable to load food details. Please try again.";
@@ -242,14 +420,22 @@ export default function FoodDetails() {
   // DERIVED DATA
   // ----------------------------------------------------------
 
-  const properties = food?.properties ?? [];
+  const properties = useMemo(
+    () => food?.properties ?? [],
+    [food]
+  );
 
   const category = useMemo(() => {
-    const types = getProperties(properties, "type");
+    const types = getProperties(
+      properties,
+      "type"
+    );
 
     return (
-      types.find((item) => item.value !== "NamedIndividual")
-        ?.value ?? "Food"
+      types.find(
+        (item) =>
+          item.value !== "NamedIndividual"
+      )?.value ?? "Food"
     );
   }, [properties]);
 
@@ -257,40 +443,57 @@ export default function FoodDetails() {
     () =>
       nutritionFields.map((field) => ({
         ...field,
-        values: getProperties(properties, field.key),
+        values: getProperties(
+          properties,
+          field.key
+        ),
       })),
     [properties]
   );
 
-  const semanticRelations = useMemo(
-    () =>
-      properties.filter(
-        (item) =>
-          item.value_type === "uri" &&
-          item.property !== "type"
-      ),
+  const semanticGroups = useMemo(
+    () => groupSemanticRelations(properties),
     [properties]
   );
 
-  const knownNutritionKeys = new Set(
-    nutritionFields.map((field) => field.key)
+  const knownNutritionKeys = useMemo(
+    () =>
+      new Set(
+        nutritionFields.map(
+          (field) => field.key
+        )
+      ),
+    []
   );
 
-  const otherProperties = properties.filter(
-    (item) =>
-      !knownNutritionKeys.has(item.property) &&
-      ![
-        "type",
-        "estBio",
-        "estLocal",
-        "scoreNutritionnel",
-        "prixMoyen",
-      ].includes(item.property) &&
-      item.value_type !== "uri"
+  const otherProperties = useMemo(
+    () =>
+      properties.filter(
+        (item) =>
+          !knownNutritionKeys.has(
+            item.property
+          ) &&
+          ![
+            "type",
+            "estBio",
+            "estLocal",
+            "scoreNutritionnel",
+            "prixMoyen",
+          ].includes(item.property) &&
+          item.value_type !== "uri"
+      ),
+    [properties, knownNutritionKeys]
   );
 
-  const organic = getBooleanValue(properties, "estBio");
-  const local = getBooleanValue(properties, "estLocal");
+  const organic = getBooleanValue(
+    properties,
+    "estBio"
+  );
+
+  const local = getBooleanValue(
+    properties,
+    "estLocal"
+  );
 
   const nutritionScore = getFirstValue(
     properties,
@@ -303,17 +506,26 @@ export default function FoodDetails() {
   );
 
   // ----------------------------------------------------------
-  // LOADING
+  // LOADING STATE
   // ----------------------------------------------------------
 
   if (loading) {
     return (
       <div className="food-details-page">
-        <div className="food-details-state">
-          <LoaderCircle className="food-details-spinner" size={36} />
+        <div
+          className="food-details-state"
+          role="status"
+        >
+          <LoaderCircle
+            className="food-details-spinner"
+            size={36}
+          />
+
           <h2>Loading food details</h2>
+
           <p>
-            Retrieving semantic information from EatHealthy...
+            Retrieving semantic information
+            from EatHealthy...
           </p>
         </div>
       </div>
@@ -321,26 +533,41 @@ export default function FoodDetails() {
   }
 
   // ----------------------------------------------------------
-  // ERROR
+  // ERROR STATE
   // ----------------------------------------------------------
 
   if (error || !food) {
     return (
       <div className="food-details-page">
-        <Link to="/foods" className="food-details-back">
+        <Link
+          to="/foods"
+          className="food-details-back"
+        >
           <ArrowLeft size={17} />
           Back to Food Explorer
         </Link>
 
-        <div className="food-details-state">
+        <div
+          className="food-details-state"
+          role="alert"
+        >
           <CircleHelp size={40} />
+
           <h2>Food details unavailable</h2>
-          <p>{error ?? "No data was returned."}</p>
+
+          <p>
+            {error ??
+              "No data was returned."}
+          </p>
 
           <button
             type="button"
             className="food-details-retry"
-            onClick={() => setReloadKey((value) => value + 1)}
+            onClick={() =>
+              setReloadKey(
+                (value) => value + 1
+              )
+            }
           >
             <RefreshCw size={16} />
             Try again
@@ -356,12 +583,19 @@ export default function FoodDetails() {
 
   return (
     <div className="food-details-page">
-      <Link to="/foods" className="food-details-back">
+      {/* BACK NAVIGATION */}
+
+      <Link
+        to="/foods"
+        className="food-details-back"
+      >
         <ArrowLeft size={17} />
         Back to Food Explorer
       </Link>
 
-      {/* HEADER */}
+      {/* ======================================================
+          HERO
+          ====================================================== */}
 
       <section className="food-details-hero">
         <div className="food-details-hero-main">
@@ -374,12 +608,18 @@ export default function FoodDetails() {
               EATHEALTHY FOOD EXPLORER
             </span>
 
-            <h1>{food.name}</h1>
+            <h1>
+              {readableResourceName(
+                food.name
+              )}
+            </h1>
 
             <div className="food-details-hero-meta">
               <span className="food-details-category">
                 <Sprout size={14} />
-                {category}
+                {readableResourceName(
+                  category
+                )}
               </span>
 
               <span className="food-details-source">
@@ -391,16 +631,23 @@ export default function FoodDetails() {
         </div>
 
         <div className="food-details-hero-stat">
-          <strong>{food.properties_count}</strong>
+          <strong>
+            {food.properties_count}
+          </strong>
+
           <span>RDF properties</span>
         </div>
       </section>
 
-      {/* MAIN GRID */}
+      {/* ======================================================
+          MAIN LAYOUT
+          ====================================================== */}
 
       <div className="food-details-layout">
-        <div className="food-details-main">
-          {/* NUTRITION */}
+        <main className="food-details-main">
+          {/* ================================================
+              NUTRITION
+              ================================================ */}
 
           <section className="food-details-panel">
             <div className="food-details-section-heading">
@@ -408,67 +655,97 @@ export default function FoodDetails() {
                 <span className="food-details-section-kicker">
                   NUTRITION
                 </span>
-                <h2>Nutritional information</h2>
+
+                <h2>
+                  Nutritional information
+                </h2>
+
                 <p>
-                  Values retrieved directly from the
-                  EatHealthy ontology.
+                  Values retrieved directly
+                  from the EatHealthy ontology.
                 </p>
               </div>
             </div>
 
             <div className="food-details-nutrition-grid">
-              {nutrients.map((nutrient) => {
-                const Icon = nutrient.icon;
+              {nutrients.map(
+                (nutrient) => {
+                  const Icon =
+                    nutrient.icon;
 
-                return (
-                  <div
-                    className={`food-details-nutrient ${nutrient.className}`}
-                    key={nutrient.key}
-                  >
-                    <div className="food-details-nutrient-top">
-                      <span className="food-details-nutrient-icon">
-                        <Icon size={19} />
-                      </span>
-                      <span className="food-details-nutrient-label">
-                        {nutrient.label}
-                      </span>
-                    </div>
+                  return (
+                    <div
+                      className={`food-details-nutrient ${nutrient.className}`}
+                      key={nutrient.key}
+                    >
+                      <div className="food-details-nutrient-top">
+                        <span className="food-details-nutrient-icon">
+                          <Icon size={19} />
+                        </span>
 
-                    <div className="food-details-nutrient-value">
-                      {nutrient.values.length > 0 ? (
-                        nutrient.values.map((item, index) => (
-                          <span key={`${item.value}-${index}`}>
-                            {formatValue(item.value)}
-                            {nutrient.unit && (
-                              <small>{nutrient.unit}</small>
-                            )}
+                        <span className="food-details-nutrient-label">
+                          {nutrient.label}
+                        </span>
+                      </div>
+
+                      <div className="food-details-nutrient-value">
+                        {nutrient.values.length >
+                        0 ? (
+                          nutrient.values.map(
+                            (
+                              item,
+                              index
+                            ) => (
+                              <span
+                                key={`${item.value}-${index}`}
+                              >
+                                {formatValue(
+                                  item.value
+                                )}
+
+                                {nutrient.unit && (
+                                  <small>
+                                    {
+                                      nutrient.unit
+                                    }
+                                  </small>
+                                )}
+                              </span>
+                            )
+                          )
+                        ) : (
+                          <span className="food-details-no-value">
+                            Not available
                           </span>
-                        ))
-                      ) : (
-                        <span className="food-details-no-value">
-                          Not available
+                        )}
+                      </div>
+
+                      {nutrient.values
+                        .length > 1 && (
+                        <span className="food-details-multiple-note">
+                          Multiple values
+                          in ontology
                         </span>
                       )}
                     </div>
-
-                    {nutrient.values.length > 1 && (
-                      <span className="food-details-multiple-note">
-                        Multiple values in ontology
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                }
+              )}
             </div>
 
             <p className="food-details-data-note">
-              Measurement units and serving sizes have not
-              been confirmed in the ontology response.
-              Multiple values are displayed separately.
+              Measurement units and
+              serving sizes have not
+              been confirmed in the
+              ontology response.
+              Multiple values are
+              displayed separately.
             </p>
           </section>
 
-          {/* SEMANTIC RELATIONSHIPS */}
+          {/* ================================================
+              SEMANTIC RELATIONSHIPS
+              ================================================ */}
 
           <section className="food-details-panel">
             <div className="food-details-section-heading">
@@ -476,101 +753,218 @@ export default function FoodDetails() {
                 <span className="food-details-section-kicker">
                   KNOWLEDGE GRAPH
                 </span>
-                <h2>Semantic relationships</h2>
+
+                <h2>
+                  Semantic relationships
+                </h2>
+
                 <p>
-                  Connections between this food and other
-                  ontology individuals.
+                  Explicit relationships
+                  recorded in the
+                  EatHealthy ontology.
                 </p>
               </div>
 
               <Database size={21} />
             </div>
 
-            {semanticRelations.length > 0 ? (
-              <div className="food-details-relations">
-                {semanticRelations.map((relation, index) => (
-                  <div
-                    className="food-details-relation"
-                    key={`${relation.property}-${relation.value}-${index}`}
-                  >
-                    <div className="food-details-relation-icon">
-                      <Database size={18} />
-                    </div>
+            <div className="food-details-semantic-groups">
+              {semanticGroups.map(
+                (group) => {
+                  const Icon =
+                    group.icon;
 
-                    <div className="food-details-relation-content">
-                      <span>
-                        {formatPropertyName(
-                          relation.property
-                        )}
-                      </span>
-                      <strong>{relation.value}</strong>
-                    </div>
-
-                    {relation.value_uri && (
-                      <a
-                        href={relation.value_uri}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="food-details-relation-link"
-                        title="Open RDF resource URI"
+                  return (
+                    <div
+                      className="food-details-semantic-group"
+                      key={group.title}
+                    >
+                      <div
+                        className="food-details-semantic-group-heading"
+                        style={{
+                          display: "flex",
+                          alignItems:
+                            "center",
+                          gap: "10px",
+                          marginBottom:
+                            "12px",
+                        }}
                       >
-                        <ArrowUpRight size={17} />
-                      </a>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="food-details-empty">
-                No additional semantic relationships
-                were found.
-              </div>
-            )}
+                        <div className="food-details-relation-icon">
+                          <Icon
+                            size={18}
+                          />
+                        </div>
+
+                        <div>
+                          <h3
+                            style={{
+                              margin: 0,
+                              fontSize:
+                                "15px",
+                            }}
+                          >
+                            {group.title}
+                          </h3>
+
+                          <p
+                            style={{
+                              margin:
+                                "5px 0 0",
+                              fontSize:
+                                "12px",
+                              color:
+                                "#829187",
+                            }}
+                          >
+                            {
+                              group.description
+                            }
+                          </p>
+                        </div>
+                      </div>
+
+                      {group.relations
+                        .length > 0 ? (
+                        <div className="food-details-relations">
+                          {group.relations.map(
+                            (
+                              relation,
+                              index
+                            ) => (
+                              <div
+                                className="food-details-relation"
+                                key={`${relation.property}-${relation.value}-${index}`}
+                              >
+                                <div className="food-details-relation-icon">
+                                  <Icon
+                                    size={
+                                      18
+                                    }
+                                  />
+                                </div>
+
+                                <div className="food-details-relation-content">
+                                  <span>
+                                    {formatPropertyName(
+                                      relation.property
+                                    )}
+                                  </span>
+
+                                  <strong>
+                                    {readableResourceName(
+                                      relation.value
+                                    )}
+                                  </strong>
+                                </div>
+
+                                {relation.value_uri && (
+                                  <a
+                                    href={
+                                      relation.value_uri
+                                    }
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="food-details-relation-link"
+                                    title="Open RDF resource URI"
+                                  >
+                                    <ArrowUpRight
+                                      size={
+                                        17
+                                      }
+                                    />
+                                  </a>
+                                )}
+                              </div>
+                            )
+                          )}
+                        </div>
+                      ) : (
+                        <div className="food-details-empty">
+                          No explicit
+                          relationships
+                          recorded.
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+              )}
+            </div>
+
+            <p className="food-details-data-note">
+              Missing relationships
+              indicate unavailable
+              information, not
+              confirmed incompatibility.
+            </p>
           </section>
 
-          {/* ADDITIONAL PROPERTIES */}
+          {/* ================================================
+              ADDITIONAL RDF PROPERTIES
+              ================================================ */}
 
-          {otherProperties.length > 0 && (
+          {otherProperties.length >
+            0 && (
             <section className="food-details-panel">
               <div className="food-details-section-heading">
                 <div>
                   <span className="food-details-section-kicker">
                     ONTOLOGY
                   </span>
-                  <h2>Additional properties</h2>
+
+                  <h2>
+                    Additional properties
+                  </h2>
                 </div>
               </div>
 
               <div className="food-details-property-list">
-                {otherProperties.map((property, index) => (
-                  <div
-                    className="food-details-property-row"
-                    key={`${property.property}-${index}`}
-                  >
-                    <span>
-                      {formatPropertyName(
-                        property.property
-                      )}
-                    </span>
-                    <strong>{property.value}</strong>
-                  </div>
-                ))}
+                {otherProperties.map(
+                  (
+                    property,
+                    index
+                  ) => (
+                    <div
+                      className="food-details-property-row"
+                      key={`${property.property}-${index}`}
+                    >
+                      <span>
+                        {formatPropertyName(
+                          property.property
+                        )}
+                      </span>
+
+                      <strong>
+                        {property.value}
+                      </strong>
+                    </div>
+                  )
+                )}
               </div>
             </section>
           )}
-        </div>
+        </main>
 
-        {/* SIDEBAR */}
+        {/* ==================================================
+            SIDEBAR
+            ================================================== */}
 
         <aside className="food-details-sidebar">
+          {/* FOOD ATTRIBUTES */}
+
           <section className="food-details-panel">
             <span className="food-details-section-kicker">
               FOOD PROFILE
             </span>
 
-            <h2>Food attributes</h2>
+            <h2>
+              Food attributes
+            </h2>
 
             <div className="food-details-attributes">
+              {/* ORGANIC */}
+
               <div className="food-details-attribute">
                 <span className="food-details-attribute-label">
                   Organic
@@ -581,24 +975,33 @@ export default function FoodDetails() {
                     organic === true
                       ? "positive"
                       : organic === false
-                      ? "negative"
-                      : "unknown"
+                        ? "negative"
+                        : "unknown"
                   }`}
                 >
                   {organic === true ? (
-                    <CheckCircle2 size={15} />
+                    <CheckCircle2
+                      size={15}
+                    />
                   ) : organic === false ? (
-                    <XCircle size={15} />
+                    <XCircle
+                      size={15}
+                    />
                   ) : (
-                    <CircleHelp size={15} />
+                    <CircleHelp
+                      size={15}
+                    />
                   )}
+
                   {organic === null
                     ? "Unknown"
                     : organic
-                    ? "Yes"
-                    : "No"}
+                      ? "Yes"
+                      : "No"}
                 </span>
               </div>
+
+              {/* LOCALLY SOURCED */}
 
               <div className="food-details-attribute">
                 <span className="food-details-attribute-label">
@@ -610,24 +1013,33 @@ export default function FoodDetails() {
                     local === true
                       ? "positive"
                       : local === false
-                      ? "negative"
-                      : "unknown"
+                        ? "negative"
+                        : "unknown"
                   }`}
                 >
                   {local === true ? (
-                    <CheckCircle2 size={15} />
+                    <CheckCircle2
+                      size={15}
+                    />
                   ) : local === false ? (
-                    <XCircle size={15} />
+                    <XCircle
+                      size={15}
+                    />
                   ) : (
-                    <CircleHelp size={15} />
+                    <CircleHelp
+                      size={15}
+                    />
                   )}
+
                   {local === null
                     ? "Unknown"
                     : local
-                    ? "Yes"
-                    : "No"}
+                      ? "Yes"
+                      : "No"}
                 </span>
               </div>
+
+              {/* NUTRITION SCORE */}
 
               <div className="food-details-attribute">
                 <span className="food-details-attribute-label">
@@ -635,11 +1047,15 @@ export default function FoodDetails() {
                 </span>
 
                 <strong>
-                  {nutritionScore
-                    ? formatValue(nutritionScore)
+                  {nutritionScore !== null
+                    ? formatValue(
+                        nutritionScore
+                      )
                     : "Not available"}
                 </strong>
               </div>
+
+              {/* AVERAGE PRICE */}
 
               <div className="food-details-attribute">
                 <span className="food-details-attribute-label">
@@ -647,29 +1063,39 @@ export default function FoodDetails() {
                 </span>
 
                 <strong>
-                  {averagePrice
-                    ? formatValue(averagePrice)
+                  {averagePrice !== null
+                    ? formatValue(
+                        averagePrice
+                      )
                     : "Not available"}
                 </strong>
               </div>
             </div>
 
             <p className="food-details-sidebar-note">
-              Scores and prices use values stored in
-              the ontology. Their scales and currency
-              have not been verified.
+              Scores and prices use
+              values stored in the
+              ontology. Their scales
+              and currency have not
+              been verified.
             </p>
           </section>
+
+          {/* RDF RESOURCE */}
 
           <section className="food-details-panel food-details-rdf-panel">
             <div className="food-details-rdf-heading">
               <Database size={20} />
-              <h2>RDF resource</h2>
+
+              <h2>
+                RDF resource
+              </h2>
             </div>
 
             <p>
-              This food is represented as an individual
-              in the EatHealthy knowledge graph.
+              This food is represented
+              as an individual in the
+              EatHealthy knowledge graph.
             </p>
 
             <div className="food-details-uri">
@@ -677,8 +1103,13 @@ export default function FoodDetails() {
             </div>
 
             <div className="food-details-rdf-count">
-              <span>Properties returned</span>
-              <strong>{food.properties_count}</strong>
+              <span>
+                Properties returned
+              </span>
+
+              <strong>
+                {food.properties_count}
+              </strong>
             </div>
           </section>
         </aside>
