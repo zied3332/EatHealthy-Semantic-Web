@@ -1,15 +1,14 @@
 
 """
-Personalized food recommendation API.
-
-Uses SPARQL assertions stored in Apache Jena Fuseki.
-Does not infer nutritional safety from missing data.
+Explainable RDF recommendations with validated temporary dietary overrides.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
+from backend.queries.nutrition import PREFIXES
 from backend.queries.recommendations import (
     build_recommendations_query,
+    validate_local_name,
 )
 from backend.services.fuseki_service import execute_sparql
 
@@ -20,8 +19,12 @@ router = APIRouter(
 )
 
 
+# ============================================================
+# HELPERS
+# ============================================================
+
 def local_name(uri: str) -> str:
-    """Extract a readable RDF local name."""
+    """Extract the local name from an RDF URI."""
     return uri.rsplit("#", 1)[-1].rsplit("/", 1)[-1]
 
 
@@ -29,10 +32,11 @@ def binding_value(row: dict, key: str) -> str | None:
     """Read a value from a SPARQL JSON binding."""
     binding = row.get(key)
 
-    if not isinstance(binding, dict):
-        return None
-
-    return binding.get("value")
+    return (
+        binding.get("value")
+        if isinstance(binding, dict)
+        else None
+    )
 
 
 def binding_bool(row: dict, key: str) -> bool:
@@ -40,41 +44,133 @@ def binding_bool(row: dict, key: str) -> bool:
     return binding_value(row, key) == "true"
 
 
+# ============================================================
+# VALIDATE ONTOLOGY INDIVIDUALS
+# ============================================================
+
+async def validate_individual(
+    name: str,
+    kind: str,
+) -> None:
+    """
+    Validate an RDF individual against the ontology.
+
+    RestrictionSansGluten1 is typed eh:SansGluten.
+
+    SansGluten is a subclass of RegimeAlimentaire,
+    not RestrictionAlimentaire.
+    """
+
+    validate_local_name(name)
+
+    if kind == "diet":
+        class_filter = (
+            "FILTER(?type != eh:SansGluten)"
+        )
+
+        class_name = "RegimeAlimentaire"
+
+    else:
+        class_filter = """
+FILTER(
+    ?type = eh:SansGluten ||
+    EXISTS {
+        ?individual eh:interditAliment ?f .
+    }
+)
+"""
+
+        class_name = "RegimeAlimentaire"
+
+    query = PREFIXES + f"""
+SELECT DISTINCT ?individual
+WHERE {{
+    BIND(eh:{name} AS ?individual)
+
+    ?individual rdf:type ?type .
+
+    ?type rdfs:subClassOf* eh:{class_name} .
+
+    {class_filter}
+}}
+LIMIT 1
+"""
+
+    if not await execute_sparql(query):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Unknown or unsupported {kind} "
+                f"individual: '{name}'."
+            ),
+        )
+
+
+# ============================================================
+# RECOMMENDATION ENDPOINT
+# ============================================================
+
 @router.get("/{person_name}")
-async def get_recommendations(person_name: str):
+async def get_recommendations(
+    person_name: str,
+    diet: str | None = Query(
+        default=None,
+        description=(
+            "RDF diet local name; diet= clears it"
+        ),
+    ),
+    restrictions: list[str] | None = Query(
+        default=None,
+        description=(
+            "Repeated RDF restriction names; "
+            "restrictions= clears all"
+        ),
+    ),
+):
     """
-    Retrieve explainable recommendations for an RDF person.
+    Return ranked food recommendations.
 
-    Foods are included when they match at least one of:
-    - Health goal
-    - Dietary regime
-    - Activity profile
+    Without overrides, use the person's RDF preferences.
 
-    Foods explicitly forbidden by a recorded restriction
-    are excluded from recommendations.
-
-    Missing compatibility data is never treated as
-    confirmation of safety.
+    With overrides, use temporary preferences without
+    modifying the ontology.
     """
+
+    # ========================================================
+    # VALIDATE REQUEST PARAMETERS
+    # ========================================================
 
     try:
-        query = build_recommendations_query(person_name)
+        validate_local_name(person_name)
+
+        if diet not in (None, ""):
+            validate_local_name(diet)
+
+        if restrictions is not None:
+            for restriction in restrictions:
+                if restriction:
+                    validate_local_name(restriction)
+
     except ValueError as exc:
         raise HTTPException(
             status_code=400,
             detail=str(exc),
         ) from exc
 
-    # Confirm the person exists in the ontology.
-    person_query = f"""
-PREFIX eh: <http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    # ========================================================
+    # FETCH ONTOLOGY PROFILE
+    # ========================================================
 
-SELECT DISTINCT ?person ?restriction
+    person_query = PREFIXES + f"""
+SELECT DISTINCT ?person ?diet ?restriction
 WHERE {{
     BIND(eh:{person_name} AS ?person)
 
     ?person rdf:type eh:Personne .
+
+    OPTIONAL {{
+        ?person eh:suitRegime ?diet .
+    }}
 
     OPTIONAL {{
         ?person eh:aRestriction ?restriction .
@@ -87,30 +183,130 @@ WHERE {{
     if not person_rows:
         raise HTTPException(
             status_code=404,
-            detail=f"Ontology person '{person_name}' not found.",
+            detail=(
+                f"Ontology person '{person_name}' not found."
+            ),
         )
 
-    restrictions = sorted({
+    ontology_diets = sorted({
         local_name(value)
         for row in person_rows
-        if (value := binding_value(row, "restriction"))
+        if (
+            value := binding_value(row, "diet")
+        )
     })
+
+    ontology_restrictions = sorted({
+        local_name(value)
+        for row in person_rows
+        if (
+            value := binding_value(row, "restriction")
+        )
+    })
+
+    # ========================================================
+    # VALIDATE DIET OVERRIDE
+    # ========================================================
+
+    if diet not in (None, ""):
+        await validate_individual(
+            diet,
+            "diet",
+        )
+
+    # ========================================================
+    # VALIDATE RESTRICTION OVERRIDES
+    # ========================================================
+
+    if restrictions is not None:
+        restrictions = sorted(set(restrictions))
+
+        # restrictions= means explicitly clear restrictions
+        if restrictions == [""]:
+            restrictions = []
+
+        elif "" in restrictions:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Empty restriction cannot be "
+                    "combined with names."
+                ),
+            )
+
+        for name in restrictions:
+            await validate_individual(
+                name,
+                "restriction",
+            )
+
+    # ========================================================
+    # DETERMINE EFFECTIVE PREFERENCES
+    # ========================================================
+
+    selected_diet = (
+        ontology_diets[0]
+        if diet is None and ontology_diets
+        else diet
+    )
+
+    selected_restrictions = (
+        ontology_restrictions
+        if restrictions is None
+        else restrictions
+    )
+
+    # ========================================================
+    # EXECUTE RECOMMENDATION QUERY
+    # ========================================================
+
+    query = build_recommendations_query(
+        person_name,
+        diet=diet,
+        restrictions=restrictions,
+    )
 
     rows = await execute_sparql(query)
 
     recommendations = []
     excluded = []
 
+    # ========================================================
+    # SCORE FOODS
+    # ========================================================
+
     for row in rows:
-        food_uri = binding_value(row, "food")
+        food_uri = binding_value(
+            row,
+            "food",
+        )
 
         if not food_uri:
             continue
 
-        goal_match = binding_bool(row, "goalMatch")
-        diet_match = binding_bool(row, "dietMatch")
-        profile_match = binding_bool(row, "profileMatch")
-        blocked = binding_bool(row, "blocked")
+        goal_match = binding_bool(
+            row,
+            "goalMatch",
+        )
+
+        diet_match = binding_bool(
+            row,
+            "dietMatch",
+        )
+
+        profile_match = binding_bool(
+            row,
+            "profileMatch",
+        )
+
+        blocked = binding_bool(
+            row,
+            "blocked",
+        )
+
+        # ----------------------------------------------------
+        # EXPLAIN RECOMMENDATION
+        # ----------------------------------------------------
 
         reasons = []
 
@@ -121,7 +317,7 @@ WHERE {{
 
         if diet_match:
             reasons.append(
-                "Explicitly matches the user's dietary regime."
+                "Explicitly matches the selected dietary regime."
             )
 
         if profile_match:
@@ -129,16 +325,28 @@ WHERE {{
                 "Explicitly matches the user's activity profile."
             )
 
+        # ----------------------------------------------------
+        # CALCULATE SCORE
+        # ----------------------------------------------------
+
         score = sum([
             goal_match,
             diet_match,
             profile_match,
         ])
 
+        # ----------------------------------------------------
+        # RESTRICTION SAFETY STATUS
+        # ----------------------------------------------------
+
         if blocked:
-            restriction_status = "explicitly_incompatible"
-        elif restrictions:
+            restriction_status = (
+                "explicitly_incompatible"
+            )
+
+        elif selected_restrictions:
             restriction_status = "unknown"
+
         else:
             restriction_status = "not_applicable"
 
@@ -161,6 +369,10 @@ WHERE {{
         else:
             recommendations.append(food)
 
+    # ========================================================
+    # SORT RESULTS
+    # ========================================================
+
     recommendations.sort(
         key=lambda food: (
             -food["score"],
@@ -168,16 +380,26 @@ WHERE {{
         )
     )
 
+    excluded.sort(
+        key=lambda food: food["name"]
+    )
+
+    # ========================================================
+    # RESPONSE
+    # ========================================================
+
     return {
         "person": person_name,
-        "restrictions": restrictions,
+        "diet": selected_diet,
+        "restrictions": selected_restrictions,
         "count": len(recommendations),
         "recommendations": recommendations,
         "excluded_count": len(excluded),
         "excluded": excluded,
         "disclaimer": (
-            "Scores count matching RDF assertions, not "
-            "nutritional quality. Missing diet or restriction "
-            "assertions do not establish compatibility or safety."
+            "Scores count matching RDF assertions, "
+            "not nutritional quality. "
+            "Missing diet or restriction assertions "
+            "do not establish compatibility or safety."
         ),
     }
