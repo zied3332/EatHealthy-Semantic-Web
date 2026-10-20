@@ -686,3 +686,228 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   EATHEALTHY — SEMANTIC RELATIONSHIP GROUPS
+   ============================================================ */
+
+.food-details-semantic-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Each semantic category has its own visual container. */
+
+.food-details-semantic-group {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #e3eee6;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    #fbfefb 0%,
+    #f6faf7 100%
+  );
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.food-details-semantic-group:hover {
+  border-color: #c7e5d0;
+  box-shadow: 0 5px 18px rgba(28, 91, 52, 0.04);
+}
+
+/* Group heading */
+
+.food-details-semantic-group-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.food-details-semantic-group-heading > div:last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.food-details-semantic-group-heading h3 {
+  margin: 0;
+  color: #234631;
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: -0.2px;
+}
+
+.food-details-semantic-group-heading p {
+  margin: 5px 0 0;
+  color: #829187;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* Group icon */
+
+.food-details-semantic-group-heading
+  .food-details-relation-icon {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #d8ebde;
+  border-radius: 12px;
+  background: #e7f5eb;
+  color: #278b4d;
+}
+
+/* Relationship cards within a group */
+
+.food-details-semantic-group
+  .food-details-relations {
+  display: grid;
+  grid-template-columns: repeat(
+    2,
+    minmax(0, 1fr)
+  );
+  gap: 10px;
+}
+
+.food-details-semantic-group
+  .food-details-relation {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #e5eee8;
+  border-radius: 12px;
+  background: #ffffff;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.food-details-semantic-group
+  .food-details-relation:hover {
+  border-color: #b9dec5;
+  transform: translateY(-2px);
+}
+
+.food-details-semantic-group
+  .food-details-relation-content strong {
+  color: #234b33;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.food-details-semantic-group
+  .food-details-relation-content span {
+  color: #819389;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* Empty group state */
+
+.food-details-semantic-group
+  .food-details-empty {
+  padding: 18px;
+  border: 1px dashed #d8e7dc;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.65);
+  color: #91a196;
+  font-size: 12px;
+  line-height: 1.6;
+  text-align: left;
+}
+
+/* RDF link */
+
+.food-details-semantic-group
+  .food-details-relation-link {
+  flex-shrink: 0;
+  color: #428f60;
+}
+
+.food-details-semantic-group
+  .food-details-relation-link:hover {
+  background: #e6f4eb;
+  color: #176c40;
+}
+
+/* Keyboard accessibility */
+
+.food-details-semantic-group
+  .food-details-relation-link:focus-visible {
+  outline: 3px solid #a6dfb6;
+  outline-offset: 3px;
+}
+
+/* ============================================================
+   RESPONSIVE SEMANTIC GROUPS
+   ============================================================ */
+
+@media (max-width: 1200px) {
+  .food-details-semantic-group
+    .food-details-relations {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .food-details-semantic-groups {
+    gap: 15px;
+  }
+
+  .food-details-semantic-group {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .food-details-semantic-group {
+    padding: 15px;
+    border-radius: 13px;
+  }
+
+  .food-details-semantic-group-heading {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .food-details-semantic-group-heading
+    .food-details-relation-icon {
+    width: 37px;
+    height: 37px;
+  }
+
+  .food-details-semantic-group-heading h3 {
+    font-size: 14px;
+  }
+
+  .food-details-semantic-group-heading p {
+    font-size: 11px;
+  }
+
+  .food-details-semantic-group
+    .food-details-relations {
+    grid-template-columns: 1fr;
+  }
+
+  .food-details-semantic-group
+    .food-details-relation {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .food-details-semantic-group
+    .food-details-relation-icon {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .food-details-semantic-group,
+  .food-details-semantic-group
+    .food-details-relation {
+    transition: none;
+  }
+}
