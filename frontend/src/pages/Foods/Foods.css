@@ -1,27 +1,38 @@
 
-/* =========================================
+/* ============================================================
    EATHEALTHY — FOOD EXPLORER
-   ========================================= */
+   ============================================================ */
 
 .foods-page {
+  --foods-green: #278b4d;
+  --foods-green-dark: #1d713c;
+  --foods-text: #24352a;
+  --foods-muted: #708477;
+  --foods-border: #e0eae2;
+  --foods-surface: #ffffff;
+
+  width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  color: #24352a;
+  color: var(--foods-text);
 }
 
-/* PAGE HEADER */
+/* ============================================================
+   PAGE HEADER
+   ============================================================ */
 
 .foods-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 24px;
-  padding: 38px 42px;
-  border-radius: 22px;
+  padding: 40px 44px;
+  border: 1px solid #dcefe0;
+  border-radius: 24px;
   background: linear-gradient(
     120deg,
-    #e6f6e8,
-    #f5fbf1
+    #e6f6e8 0%,
+    #f5fbf1 100%
   );
 }
 
@@ -38,14 +49,17 @@
 
 .foods-header h1 {
   margin: 0 0 13px;
+  color: #213c29;
   font-size: clamp(28px, 3vw, 42px);
+  font-weight: 800;
   letter-spacing: -1.3px;
+  line-height: 1.15;
 }
 
 .foods-header p {
   max-width: 580px;
   margin: 0;
-  color: #708477;
+  color: var(--foods-muted);
   font-size: 14px;
   line-height: 1.8;
 }
@@ -61,10 +75,13 @@
   color: #298c4c;
 }
 
-/* SEARCH TOOLBAR */
+/* ============================================================
+   SEARCH TOOLBAR
+   ============================================================ */
 
 .foods-toolbar {
   display: flex;
+  align-items: stretch;
   gap: 14px;
   margin-top: 30px;
 }
@@ -74,56 +91,75 @@
   align-items: center;
   gap: 12px;
   flex: 1;
+  min-width: 0;
+  min-height: 52px;
   padding: 0 17px;
-  min-height: 49px;
-  border: 1px solid #e0eae2;
-  border-radius: 11px;
-  background: white;
+  border: 1px solid var(--foods-border);
+  border-radius: 13px;
+  background: var(--foods-surface);
   color: #809489;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .foods-search:focus-within {
   border-color: #43a765;
+  box-shadow: 0 0 0 3px rgba(67, 167, 101, 0.1);
 }
 
 .foods-search input {
   width: 100%;
+  min-width: 0;
   border: none;
   outline: none;
   background: transparent;
-  color: #24352a;
+  color: var(--foods-text);
   font-size: 14px;
+}
+
+.foods-search input::placeholder {
+  color: #9aa99e;
 }
 
 .foods-search-clear {
   display: grid;
   place-items: center;
-  padding: 5px;
+  flex-shrink: 0;
+  padding: 6px;
   border: none;
+  border-radius: 7px;
   background: transparent;
   color: #87998b;
   cursor: pointer;
 }
 
 .foods-search-clear:hover {
-  color: #278b4d;
+  background: #edf8ef;
+  color: var(--foods-green);
 }
 
 .foods-refresh {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
+  min-height: 52px;
   padding: 0 20px;
   border: 1px solid #dce9de;
-  border-radius: 11px;
+  border-radius: 13px;
   background: white;
   color: #328650;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .foods-refresh:hover:not(:disabled) {
+  border-color: #a8d5b5;
   background: #edf8ef;
 }
 
@@ -132,10 +168,16 @@
   cursor: not-allowed;
 }
 
-/* CATEGORY FILTERS */
+/* ============================================================
+   FILTER SECTION
+   ============================================================ */
 
 .foods-filter-section {
   margin-top: 28px;
+  padding: 23px;
+  border: 1px solid #e8efe9;
+  border-radius: 18px;
+  background: #ffffff;
 }
 
 .foods-filter-heading {
@@ -143,7 +185,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 15px;
+  margin-bottom: 17px;
 }
 
 .foods-filter-title {
@@ -161,6 +203,7 @@
   gap: 6px;
   padding: 7px 10px;
   border: none;
+  border-radius: 8px;
   background: transparent;
   color: #458b5b;
   font-size: 12px;
@@ -169,8 +212,13 @@
 }
 
 .foods-clear-filters:hover {
+  background: #edf8ef;
   color: #1d6837;
 }
+
+/* ============================================================
+   CATEGORY FILTERS
+   ============================================================ */
 
 .foods-categories {
   display: flex;
@@ -183,29 +231,36 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 10px 14px;
+  min-height: 41px;
+  padding: 9px 14px;
   border: 1px solid #dce9de;
-  border-radius: 10px;
+  border-radius: 11px;
   background: white;
   color: #617b69;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition:
-    background 0.2s,
-    border-color 0.2s,
-    color 0.2s;
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .foods-category-btn:hover {
   border-color: #8dc69e;
   background: #f0f9f2;
+  transform: translateY(-1px);
 }
 
 .foods-category-btn.active {
-  border-color: #278b4d;
-  background: #278b4d;
+  border-color: var(--foods-green);
+  background: var(--foods-green);
   color: white;
+}
+
+.foods-category-btn.active:hover {
+  background: var(--foods-green-dark);
 }
 
 .foods-category-btn:focus-visible {
@@ -216,10 +271,10 @@
 .foods-category-count {
   display: grid;
   place-items: center;
-  min-width: 22px;
-  height: 22px;
+  min-width: 23px;
+  height: 23px;
   padding: 0 6px;
-  border-radius: 6px;
+  border-radius: 7px;
   background: #edf5ef;
   color: #4c9160;
   font-size: 11px;
@@ -231,16 +286,59 @@
   color: white;
 }
 
-/* RESULTS SUMMARY */
+/* ============================================================
+   SORTING CONTROLS
+
+   Works with the sorting markup currently in Foods.tsx.
+   ============================================================ */
+
+.foods-filter-section label[for="foods-sort"] {
+  color: #415e49;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#foods-sort {
+  min-width: 175px;
+  min-height: 43px;
+  padding: 10px 36px 10px 14px;
+  border: 1px solid #dce9de;
+  border-radius: 11px;
+  background-color: white;
+  color: #304d39;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#foods-sort:hover {
+  border-color: #8dc69e;
+}
+
+#foods-sort:focus-visible {
+  outline: 3px solid #a6dfb6;
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   RESULTS SUMMARY
+   ============================================================ */
 
 .foods-summary {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin: 24px 0 18px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 25px 0 20px;
   color: #647c6c;
   font-size: 13px;
   font-weight: 600;
+}
+
+.foods-summary > svg {
+  flex-shrink: 0;
+  color: var(--foods-green);
 }
 
 .foods-source {
@@ -250,65 +348,88 @@
   font-weight: 400;
 }
 
-/* FOOD GRID */
+/* ============================================================
+   FOOD GRID
+   ============================================================ */
 
 .foods-grid {
   display: grid;
-  grid-template-columns: repeat(
-    3,
-    minmax(0, 1fr)
-  );
-  gap: 19px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
   padding-bottom: 40px;
 }
 
 .food-card {
   display: flex;
   flex-direction: column;
-  min-height: 235px;
+  min-width: 0;
+  min-height: 245px;
   padding: 25px;
   border: 1px solid #e5eee7;
-  border-radius: 17px;
+  border-radius: 18px;
   background: white;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
   transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.food-card:visited {
+  color: inherit;
 }
 
 .food-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 15px 35px rgba(30, 80, 40, 0.07);
+  border-color: #b9dfc4;
+  box-shadow: 0 15px 35px rgba(30, 80, 40, 0.08);
+}
+
+.food-card:focus-visible {
+  outline: 3px solid #56b777;
+  outline-offset: 4px;
 }
 
 .food-card-top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 22px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 23px;
 }
 
 .food-card-icon {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 13px;
+  width: 49px;
+  height: 49px;
+  flex-shrink: 0;
+  border-radius: 14px;
   background: #e9f7ed;
   color: #2b9552;
 }
 
 .food-card-category {
+  max-width: 100%;
   padding: 7px 11px;
   border-radius: 8px;
   background: #f0f7f1;
   color: #4b9462;
   font-size: 11px;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .food-card h2 {
-  margin: 0 0 10px;
+  margin: 0 0 11px;
+  color: #243c2b;
   font-size: 19px;
+  font-weight: 750;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .food-card > p {
@@ -323,6 +444,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding-top: 17px;
   border-top: 1px solid #edf2ee;
   color: #39945b;
@@ -333,9 +455,22 @@
   align-items: center;
   gap: 7px;
   font-size: 11px;
+  font-weight: 600;
 }
 
-/* LOADING / ERROR / EMPTY STATES */
+.food-card-footer > svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.food-card:hover .food-card-footer > svg,
+.food-card:focus-visible .food-card-footer > svg {
+  transform: translateX(5px);
+}
+
+/* ============================================================
+   LOADING / ERROR / EMPTY STATES
+   ============================================================ */
 
 .foods-state {
   display: flex;
@@ -364,13 +499,14 @@
   padding: 11px 18px;
   border: none;
   border-radius: 9px;
-  background: #278b4d;
+  background: var(--foods-green);
   color: white;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .foods-state button:hover {
-  background: #1d713c;
+  background: var(--foods-green-dark);
 }
 
 .foods-error {
@@ -387,20 +523,32 @@
   }
 }
 
-/* RESPONSIVE */
+/* ============================================================
+   RESPONSIVE — TABLET
+   ============================================================ */
 
 @media (max-width: 1100px) {
   .foods-grid {
-    grid-template-columns: repeat(
-      2,
-      minmax(0, 1fr)
-    );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .foods-header {
+    padding: 34px;
   }
 }
 
+/* ============================================================
+   RESPONSIVE — MOBILE
+   ============================================================ */
+
 @media (max-width: 650px) {
   .foods-header {
-    padding: 30px 24px;
+    padding: 29px 23px;
+    border-radius: 18px;
+  }
+
+  .foods-header h1 {
+    font-size: 29px;
   }
 
   .foods-header-icon {
@@ -409,10 +557,22 @@
 
   .foods-toolbar {
     flex-direction: column;
+    gap: 11px;
+    margin-top: 22px;
+  }
+
+  .foods-search {
+    min-height: 49px;
   }
 
   .foods-refresh {
-    min-height: 45px;
+    min-height: 46px;
+  }
+
+  .foods-filter-section {
+    margin-top: 20px;
+    padding: 17px;
+    border-radius: 15px;
   }
 
   .foods-filter-heading {
@@ -427,8 +587,22 @@
     padding: 9px 12px;
   }
 
+  #foods-sort {
+    width: 100%;
+  }
+
   .foods-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .food-card {
+    min-height: 215px;
+    padding: 21px;
+  }
+
+  .foods-summary {
+    margin-top: 20px;
   }
 
   .foods-source {
@@ -437,33 +611,19 @@
 }
 
 /* ============================================================
-   CLICKABLE FOOD CARDS
+   REDUCED MOTION
    ============================================================ */
 
-/* Food cards are now React Router links. */
-.food-card {
-  color: inherit;
-  text-decoration: none;
-  cursor: pointer;
-}
+@media (prefers-reduced-motion: reduce) {
+  .food-card,
+  .food-card-footer > svg,
+  .foods-category-btn,
+  .foods-search,
+  .foods-refresh {
+    transition: none;
+  }
 
-/* Preserve the card's text styling. */
-.food-card:visited {
-  color: inherit;
-}
-
-/* Clear keyboard focus for accessibility. */
-.food-card:focus-visible {
-  outline: 3px solid #56b777;
-  outline-offset: 4px;
-}
-
-/* Highlight the arrow when hovering over a card. */
-.food-card-footer > svg {
-  transition: transform 0.2s ease;
-}
-
-.food-card:hover .food-card-footer > svg,
-.food-card:focus-visible .food-card-footer > svg {
-  transform: translateX(5px);
+  .foods-spinner {
+    animation: none;
+  }
 }
