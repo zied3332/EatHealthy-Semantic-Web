@@ -4,7 +4,7 @@
 __pycache__/
 *.pyc
 .env
-
+/fuseki-data/
 # Node.js
 node_modules/
 dist/

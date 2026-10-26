@@ -1,5 +1,7 @@
 
 import { NavLink, Outlet } from "react-router-dom";
+import type { ReactNode } from "react";
+import { useAuth } from "../../context/AuthContext";
 import {
   Leaf,
   House,
@@ -12,7 +14,7 @@ import {
 
 import "./AppLayout.css";
 
-const navigation = [
+export const navigation = [
   { label: "Home", path: "/", icon: House },
   { label: "My Profile", path: "/profile", icon: UserRound },
   { label: "Food Explorer", path: "/foods", icon: Apple },
@@ -21,7 +23,12 @@ const navigation = [
   { label: "AI Assistant", path: "/assistant", icon: MessageCircle },
 ];
 
-export default function AppLayout() {
+export default function AppLayout({
+  children,
+}: {
+  children?: ReactNode;
+}) {
+  const { user, logout } = useAuth();
   return (
     <div className="app-layout">
       <aside className="app-sidebar">
@@ -35,6 +42,12 @@ export default function AppLayout() {
         </div>
 
         <nav className="sidebar-navigation">
+          {user?.role === "admin" && (
+            <NavLink className="sidebar-link" to="/admin/users">
+              <UserRound size={19} />
+              <span>Manage Users</span>
+            </NavLink>
+          )}
           {navigation.map((item) => {
             const Icon = item.icon;
 
@@ -55,13 +68,14 @@ export default function AppLayout() {
         </nav>
 
         <div className="sidebar-footer">
-          <span>EatHealthy</span>
-          <small>Semantic Nutrition Platform</small>
+          <span>{user?.username}</span>
+          <small>{user?.role}</small>
+          <button type="button" onClick={logout}>Sign out</button>
         </div>
       </aside>
 
       <main className="app-main">
-        <Outlet />
+        {children ?? <Outlet />}
       </main>
     </div>
   );

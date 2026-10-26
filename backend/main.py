@@ -20,6 +20,7 @@ from backend.routers import (
     diets,
     profile,
     recommendations,
+    users,
 )
 
 
@@ -53,7 +54,7 @@ app.add_middleware(
         "http://127.0.0.1:5174",
     ],
     allow_credentials=False,
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -73,6 +74,9 @@ app.include_router(profile.router)
 
 # Personalized food recommendations using SPARQL.
 app.include_router(recommendations.router)
+
+# Authentication and user management.
+app.include_router(users.router)
 
 
 # ============================================================

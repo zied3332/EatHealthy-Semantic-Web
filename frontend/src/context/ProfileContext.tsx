@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import api from "../services/api";
+import { useAuth } from "./AuthContext";
 
 // ============================================================
 // TYPES
@@ -145,6 +146,7 @@ export function ProfileProvider({
 }: {
   children: ReactNode;
 }) {
+  const { user } = useAuth();
   const [persons, setPersons] = useState<ProfilePerson[]>(
     []
   );
@@ -211,6 +213,14 @@ export function ProfileProvider({
         setRelationships(nextRelationships);
 
         setSelectedPerson((previous) => {
+          if (user?.role === "client" && user.person) {
+            return nextPersons.some(
+              (person) => person.name === user.person
+            )
+              ? user.person
+              : previous;
+          }
+
           const exists = nextPersons.some(
             (person) => person.name === previous
           );
@@ -257,7 +267,7 @@ export function ProfileProvider({
     return () => {
       active = false;
     };
-  }, [reloadKey]);
+  }, [reloadKey, user]);
 
   // ============================================================
   // SELECTED PERSON RELATIONSHIPS

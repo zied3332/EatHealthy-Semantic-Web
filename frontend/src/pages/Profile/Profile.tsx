@@ -11,8 +11,14 @@ import {
   ShieldCheck,
   Target,
   UserRound,
+  Pencil,
+  Save,
+  X,
 } from "lucide-react";
+import { useState } from "react";
 
+import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
 import {
   useProfile,
   type ProfileRelationship,
@@ -213,11 +219,99 @@ function FieldGroup({
   );
 }
 
+function InlineProfileEditor({
+  person,
+  relationships,
+  onSaved,
+  onCancel,
+}: {
+  person: string;
+  relationships: ProfileRelationship[];
+  onSaved: () => void;
+  onCancel: () => void;
+}) {
+  const value = (property: string) =>
+    getValues(relationships, property)[0] ?? "";
+  const [form, setForm] = useState({
+    name: value("aNom"),
+    age: value("aAge"),
+    weight: value("aPoids"),
+    height: value("aTaille"),
+    sex: value("aSexe"),
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save(event: React.FormEvent) {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await api.put(`/api/users/${encodeURIComponent(person)}`, {
+        name: form.name || undefined,
+        age: form.age ? Number(form.age) : undefined,
+        weight: form.weight ? Number(form.weight) : undefined,
+        height: form.height ? Number(form.height) : undefined,
+        sex: form.sex || undefined,
+      });
+      onSaved();
+    } catch {
+      setError("Unable to save profile changes.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function update(field: keyof typeof form, next: string) {
+    setForm((current) => ({ ...current, [field]: next }));
+  }
+
+  return (
+    <form className="profile-inline-editor" onSubmit={save}>
+      {error && <p className="profile-inline-error">{error}</p>}
+      <label>
+        Name
+        <input value={form.name} onChange={(event) => update("name", event.target.value)} />
+      </label>
+      <label>
+        Age
+        <input type="number" value={form.age} onChange={(event) => update("age", event.target.value)} />
+      </label>
+      <label>
+        Sex
+        <select value={form.sex} onChange={(event) => update("sex", event.target.value)}>
+          <option value="">Not recorded</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </label>
+      <label>
+        Weight (kg)
+        <input type="number" value={form.weight} onChange={(event) => update("weight", event.target.value)} />
+      </label>
+      <label>
+        Height (cm)
+        <input type="number" value={form.height} onChange={(event) => update("height", event.target.value)} />
+      </label>
+      <div className="profile-inline-actions">
+        <button type="submit" disabled={saving}>
+          <Save size={15} /> {saving ? "Saving..." : "Save"}
+        </button>
+        <button type="button" onClick={onCancel}>
+          <X size={15} /> Cancel
+        </button>
+      </div>
+    </form>
+  );
+}
+
 // ============================================================
 // PROFILE PAGE
 // ============================================================
 
 export default function Profile() {
+  const { user } = useAuth();
+  const [editingPersonalInfo, setEditingPersonalInfo] = useState(false);
   // All profile state now comes from the shared context.
   const {
     persons,
@@ -347,6 +441,7 @@ export default function Profile() {
         <>
           {/* PERSON SELECTOR */}
 
+          {user?.role === "admin" && (
           <section className="profile-selector-card">
             <div className="profile-selector-icon">
               <UserRound size={24} />
@@ -387,6 +482,7 @@ export default function Profile() {
               ))}
             </select>
           </section>
+          )}
 
           {selectedPersonOption ? (
             <>
@@ -506,12 +602,34 @@ export default function Profile() {
                       <h3>Personal Information</h3>
                       <p>RDF datatype properties</p>
                     </div>
+
+                    <button
+                      className="profile-edit-icon"
+                      type="button"
+                      onClick={() => setEditingPersonalInfo((value) => !value)}
+                      title="Edit personal information"
+                      aria-label="Edit personal information"
+                    >
+                      {editingPersonalInfo ? <X size={17} /> : <Pencil size={17} />}
+                    </button>
                   </div>
 
-                  <FieldGroup
-                    fields={personalFields}
-                    relationships={selectedRelationships}
-                  />
+                  {editingPersonalInfo ? (
+                    <InlineProfileEditor
+                      person={selectedPerson}
+                      relationships={selectedRelationships}
+                      onSaved={() => {
+                        setEditingPersonalInfo(false);
+                        refreshProfile();
+                      }}
+                      onCancel={() => setEditingPersonalInfo(false)}
+                    />
+                  ) : (
+                    <FieldGroup
+                      fields={personalFields}
+                      relationships={selectedRelationships}
+                    />
+                  )}
                 </section>
 
                 {/* NUTRITION */}

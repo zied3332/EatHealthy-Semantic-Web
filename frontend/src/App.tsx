@@ -1,11 +1,14 @@
 
 import {
   BrowserRouter,
+  Navigate,
   Routes,
   Route,
 } from "react-router-dom";
 
 import AppLayout from "./components/layout/AppLayout";
+import ClientLayout from "./components/layout/ClientLayout";
+import PublicLayout from "./components/layout/PublicLayout";
 
 // ============================================================
 // CONTEXT PROVIDERS
@@ -15,6 +18,7 @@ import AppLayout from "./components/layout/AppLayout";
 // Makes the selected user and their RDF relationships
 // available throughout the React application.
 import { ProfileProvider } from "./context/ProfileContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // ============================================================
 // PAGES
@@ -37,6 +41,10 @@ import Diets from "./pages/Diets/Diets";
 
 // Personalized Recommendations - SPARQL-powered food matching
 import Recommendations from "./pages/Recommendations/Recommendations";
+import Login from "./pages/Auth/Login";
+import Register from "./pages/Auth/Register";
+import AdminUsers from "./pages/AdminUsers/AdminUsers";
+import ProfileEdit from "./pages/ProfileEdit/ProfileEdit";
 
 // ============================================================
 // TEMPORARY PLACEHOLDER
@@ -57,24 +65,56 @@ function PlaceholderPage({ title }: { title: string }) {
 // APPLICATION ROUTES
 // ============================================================
 
+function ProtectedLayout() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return user.role === "admin" ? <AppLayout /> : <ClientLayout />;
+}
+
+function HomeRoute() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <PublicLayout>
+        <Home />
+      </PublicLayout>
+    );
+  }
+
+  return user.role === "admin" ? (
+    <AppLayout>
+      <Home />
+    </AppLayout>
+  ) : (
+    <ClientLayout>
+      <Home />
+    </ClientLayout>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
-      {/* Shared profile data for all application pages */}
-      <ProfileProvider>
+      <AuthProvider>
         <Routes>
-          {/* All pages share the same application layout */}
-          <Route element={<AppLayout />}>
-            {/* HOME */}
-            <Route
-              path="/"
-              element={<Home />}
-            />
-
+          <Route element={<PublicLayout />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
+          <Route path="/" element={<HomeRoute />} />
+        </Routes>
+        <ProfileProvider>
+        <Routes>
+          <Route element={<ProtectedLayout />}>
             {/* HEALTH PROFILE */}
             <Route
               path="/profile"
               element={<Profile />}
+            />
+            <Route
+              path="/profile/edit"
+              element={<ProfileEdit />}
             />
 
             {/* FOOD EXPLORER */}
@@ -111,9 +151,11 @@ function App() {
                 <PlaceholderPage title="AI Assistant" />
               }
             />
+            <Route path="/admin/users" element={<AdminUsers />} />
           </Route>
         </Routes>
-      </ProfileProvider>
+        </ProfileProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

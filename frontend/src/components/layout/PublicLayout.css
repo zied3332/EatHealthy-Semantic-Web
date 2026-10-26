@@ -1,0 +1,88 @@
+.public-layout {
+  min-height: 100vh;
+  background: #f7f9f7;
+}
+
+.public-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 76px;
+  padding: 14px clamp(20px, 5vw, 72px);
+  border-bottom: 1px solid #e4ece5;
+  background: rgb(255 255 255 / 94%);
+  backdrop-filter: blur(12px);
+}
+
+.public-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #23834a;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.7px;
+  text-decoration: none;
+}
+
+.public-navigation {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.public-navigation a,
+.public-navigation button {
+  color: #617067;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.public-navigation a:hover,
+.public-navigation button:hover {
+  color: #23834a;
+}
+
+.public-signin {
+  padding: 10px 4px;
+}
+
+.public-register,
+.public-dashboard-link {
+  padding: 11px 17px;
+  border-radius: 9px;
+  color: #fff !important;
+  background: #23834a !important;
+}
+
+.public-main {
+  padding: 30px clamp(18px, 5vw, 72px) 60px;
+}
+
+@media (max-width: 650px) {
+  .public-navbar {
+    align-items: flex-start;
+  }
+
+  .public-navigation {
+    gap: 10px;
+  }
+
+  .public-navigation > a:first-child,
+  .public-navigation > a:nth-child(2) {
+    display: none;
+  }
+
+  .public-main {
+    padding-top: 18px;
+  }
+}

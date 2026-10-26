@@ -1,0 +1,109 @@
+.client-layout {
+  min-height: 100vh;
+  background: #f7f9f7;
+}
+
+.client-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 76px;
+  padding: 12px clamp(18px, 4vw, 58px);
+  border-bottom: 1px solid #e4ece5;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 4px 18px rgb(34 80 46 / 4%);
+  backdrop-filter: blur(12px);
+}
+
+.client-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  color: #23834a;
+  font-size: 21px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.client-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.client-navigation-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 11px;
+  border-radius: 9px;
+  color: #657269;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.client-navigation-link:hover,
+.client-navigation-link.active {
+  color: #23834a;
+  background: #e7f5ea;
+}
+
+.client-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.client-account span {
+  color: #405047;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.client-account button {
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
+  color: #23834a;
+  background: #edf6ef;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.client-main {
+  min-width: 0;
+  padding: 28px clamp(18px, 4vw, 58px) 56px;
+}
+
+@media (max-width: 1100px) {
+  .client-navbar {
+    flex-wrap: wrap;
+  }
+
+  .client-navigation {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 620px) {
+  .client-account span {
+    display: none;
+  }
+
+  .client-navigation {
+    justify-content: flex-start;
+  }
+}

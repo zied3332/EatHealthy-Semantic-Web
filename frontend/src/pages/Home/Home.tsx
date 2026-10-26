@@ -120,7 +120,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="home-features">
+      <section className="home-features" id="features">
         <div className="home-section-heading">
           <div>
             <div className="home-section-label">
