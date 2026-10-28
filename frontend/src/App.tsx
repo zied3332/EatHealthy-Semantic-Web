@@ -45,6 +45,7 @@ import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import AdminUsers from "./pages/AdminUsers/AdminUsers";
 import ProfileEdit from "./pages/ProfileEdit/ProfileEdit";
+import Impacts from "./pages/Impacts/Impacts";
 
 // ============================================================
 // TEMPORARY PLACEHOLDER
@@ -128,6 +129,12 @@ function App() {
             <Route
               path="/foods/:foodName"
               element={<FoodDetails />}
+            />
+
+            {/* ENVIRONMENTAL IMPACT */}
+            <Route
+              path="/impacts"
+              element={<Impacts />}
             />
 
             {/* DIETARY PREFERENCES */}

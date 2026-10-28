@@ -1,6 +1,6 @@
 
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
   ArrowLeft,
@@ -20,6 +20,11 @@ import {
 } from "lucide-react";
 
 import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import { ADMIN_ONLY, co2Badge, deleteFood, errorMessage } from "../../services/aliments";
+import type { FoodSummary } from "../../services/aliments";
+import FoodForm from "../Foods/FoodForm";
+import "../Foods/aliments.css";
 import "./FoodDetails.css";
 
 // ============================================================
@@ -34,7 +39,7 @@ interface FoodProperty {
   value_type: string;
 }
 
-interface FoodDetailsResponse {
+interface FoodDetailsResponse extends Partial<FoodSummary> {
   name: string;
   uri: string;
   properties_count: number;
@@ -342,6 +347,23 @@ export default function FoodDetails() {
   const [reloadKey, setReloadKey] =
     useState(0);
 
+  // Module "Gestion des aliments": admin edit / delete.
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [showEdit, setShowEdit] = useState(false);
+  const [adminError, setAdminError] = useState<string | null>(null);
+
+  async function removeFood(id: string, name: string) {
+    const message = `Delete ${name}? Its environmental impacts and its links to meals, diets and recommendations will be deleted too.`;
+    if (!window.confirm(message)) return;
+    try {
+      await deleteFood(id);
+      navigate("/foods");
+    } catch (err) {
+      setAdminError(errorMessage(err, "The food could not be deleted."));
+    }
+  }
+
   // ----------------------------------------------------------
   // FETCH FOOD DETAILS
   // ----------------------------------------------------------
@@ -593,6 +615,29 @@ export default function FoodDetails() {
         Back to Food Explorer
       </Link>
 
+      {/* ADMIN ACTIONS (module "Gestion des aliments") */}
+
+      {user?.role === "admin" ? (
+        <div className="eh-actions">
+          <button type="button" className="eh-button secondary" onClick={() => setShowEdit(true)}>Edit food</button>
+          <button type="button" className="eh-button danger"
+            onClick={() => void removeFood(food.name, food.label ?? food.name)}>Delete food</button>
+        </div>
+      ) : (
+        <p className="eh-admin-note">{ADMIN_ONLY}</p>
+      )}
+      {adminError && <div className="eh-error" role="alert">{adminError}</div>}
+      {showEdit && (
+        <FoodForm
+          food={food}
+          onClose={() => setShowEdit(false)}
+          onSaved={() => {
+            setShowEdit(false);
+            setReloadKey((value) => value + 1);
+          }}
+        />
+      )}
+
       {/* ======================================================
           HERO
           ====================================================== */}
@@ -609,9 +654,10 @@ export default function FoodDetails() {
             </span>
 
             <h1>
-              {readableResourceName(
-                food.name
-              )}
+              {food.label ??
+                readableResourceName(
+                  food.name
+                )}
             </h1>
 
             <div className="food-details-hero-meta">
@@ -645,6 +691,22 @@ export default function FoodDetails() {
 
       <div className="food-details-layout">
         <main className="food-details-main">
+          {/* ENVIRONMENTAL IMPACT (read-only; the CRUD is on the Impacts page) */}
+
+          <section className="food-details-panel">
+            <span className="food-details-section-kicker">ENVIRONMENT</span>
+            <h2>Environmental impact</h2>
+            <div className="eh-badges">
+              <span className={co2Badge(food.co2 ?? null).className} title={co2Badge(food.co2 ?? null).title}>
+                {co2Badge(food.co2 ?? null).label}
+              </span>
+              {food.sustainable && <span className="eh-badge sustainable">Sustainable</span>}
+            </div>
+            <p>Carbon: <strong>{food.co2 != null ? `${food.co2} kg CO2e/kg` : "not set"}</strong></p>
+            <p>Water: <strong>{food.water != null ? `${food.water} L/kg` : "not set"}</strong></p>
+            <Link className="eh-link" to="/impacts">Manage impacts →</Link>
+          </section>
+
           {/* ================================================
               NUTRITION
               ================================================ */}

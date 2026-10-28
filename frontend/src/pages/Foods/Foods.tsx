@@ -1,13 +1,15 @@
 
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
   Apple,
   ArrowDownAZ,
   ArrowRight,
   Database,
+  Leaf,
   LoaderCircle,
+  Plus,
   RefreshCw,
   Search,
   SlidersHorizontal,
@@ -16,6 +18,10 @@ import {
 } from "lucide-react";
 
 import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import { ADMIN_ONLY, co2Badge } from "../../services/aliments";
+import AskFoods from "./AskFoods";
+import FoodForm from "./FoodForm";
 import "./Foods.css";
 
 // ============================================================
@@ -27,6 +33,9 @@ type Food = {
   name: string;
   category: string;
   description: string;
+  label: string | null;
+  co2: number | null;
+  sustainable: boolean;
 };
 
 type ApiFood = Record<string, unknown>;
@@ -115,6 +124,10 @@ function normalizeFood(
     description:
       readValue(item.description) ||
       "Explore this food in the EatHealthy knowledge graph.",
+
+    label: typeof item.label === "string" ? item.label : null,
+    co2: typeof item.co2 === "number" ? item.co2 : null,
+    sustainable: item.sustainable === true,
   };
 }
 
@@ -176,6 +189,11 @@ function extractFoods(data: unknown): Food[] {
 // ============================================================
 
 export default function Foods() {
+  // Module "Gestion des aliments": admin "Add food" form
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [showForm, setShowForm] = useState(false);
+
   // Data
   const [foods, setFoods] = useState<Food[]>([]);
 
@@ -382,7 +400,24 @@ export default function Foods() {
           <RefreshCw size={17} />
           Refresh
         </button>
+
+        {user?.role === "admin" && (
+          <button type="button" className="eh-button" onClick={() => setShowForm(true)}>
+            <Plus size={17} /> Add food
+          </button>
+        )}
       </div>
+
+      {user?.role !== "admin" && <p className="eh-admin-note">{ADMIN_ONLY}</p>}
+
+      {showForm && (
+        <FoodForm
+          onClose={() => setShowForm(false)}
+          onSaved={(id) => navigate(`/foods/${encodeURIComponent(id)}`)}
+        />
+      )}
+
+      <AskFoods />
 
       {/* FILTERS */}
 
@@ -630,7 +665,18 @@ export default function Foods() {
                   </span>
                 </div>
 
-                <h2>{readableName(food.name)}</h2>
+                <h2>{food.label ?? readableName(food.name)}</h2>
+
+                <div className="eh-badges">
+                  <span className={co2Badge(food.co2).className} title={co2Badge(food.co2).title}>
+                    {co2Badge(food.co2).label}
+                  </span>
+                  {food.sustainable && (
+                    <span className="eh-badge sustainable" title="AlimentDurable (low carbon and local)">
+                      <Leaf size={12} /> Sustainable
+                    </span>
+                  )}
+                </div>
 
                 <p>{food.description}</p>
 
