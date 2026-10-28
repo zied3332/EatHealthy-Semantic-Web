@@ -1,0 +1,94 @@
+@prefix eh:   <http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Module "Gestion des aliments" (Mahdi): additions to the EatHealthy schema
+
+eh:valeurImpact a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:subPropertyOf eh:valeurEnvironnementale ;
+    rdfs:domain eh:ImpactEnvironnemental ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "valeur de l'impact"@fr ;
+    rdfs:comment "Valeur d'une empreinte : kg CO2e par kg d'aliment (EmpreinteCarbone) ou litres par kg (EmpreinteEau)."@fr .
+
+eh:uniteImpact a owl:DatatypeProperty ;
+    rdfs:domain eh:ImpactEnvironnemental ;
+    rdfs:range xsd:string ;
+    rdfs:label "unité de l'impact"@fr .
+
+eh:sourceImpact a owl:DatatypeProperty ;
+    rdfs:domain eh:ImpactEnvironnemental ;
+    rdfs:range xsd:string ;
+    rdfs:label "source de l'impact"@fr .
+
+eh:estImpactDe a owl:ObjectProperty ;
+    owl:inverseOf eh:aImpact ;
+    rdfs:domain eh:ImpactEnvironnemental ;
+    rdfs:range eh:Aliment ;
+    rdfs:label "est l'impact de"@fr .
+
+eh:aCalories a owl:FunctionalProperty .
+eh:prixMoyen a owl:FunctionalProperty .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( eh:Fruit eh:Legume eh:Cereale eh:Viande eh:Poisson eh:ProduitLaitier ) .
+
+eh:EmpreinteCarbone owl:disjointWith eh:EmpreinteEau .
+eh:Aliment owl:disjointWith eh:ImpactEnvironnemental .
+
+eh:AlimentFaibleCarbone a owl:Class ;
+    rdfs:label "Aliment à faible empreinte carbone"@fr ;
+    rdfs:comment "Aliment dont l'empreinte carbone est inférieure ou égale à 2 kg CO2e par kg."@fr ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:intersectionOf ( eh:Aliment
+            [ a owl:Restriction ;
+              owl:onProperty eh:aImpact ;
+              owl:someValuesFrom [
+                  a owl:Class ;
+                  owl:intersectionOf ( eh:EmpreinteCarbone
+                      [ a owl:Restriction ;
+                        owl:onProperty eh:valeurImpact ;
+                        owl:someValuesFrom [
+                            a rdfs:Datatype ;
+                            owl:onDatatype xsd:decimal ;
+                            owl:withRestrictions ( [ xsd:maxInclusive "2.0"^^xsd:decimal ] )
+                        ]
+                      ] )
+              ]
+            ] )
+    ] .
+
+eh:AlimentFortCarbone a owl:Class ;
+    rdfs:label "Aliment à forte empreinte carbone"@fr ;
+    rdfs:comment "Aliment dont l'empreinte carbone est supérieure ou égale à 10 kg CO2e par kg."@fr ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:intersectionOf ( eh:Aliment
+            [ a owl:Restriction ;
+              owl:onProperty eh:aImpact ;
+              owl:someValuesFrom [
+                  a owl:Class ;
+                  owl:intersectionOf ( eh:EmpreinteCarbone
+                      [ a owl:Restriction ;
+                        owl:onProperty eh:valeurImpact ;
+                        owl:someValuesFrom [
+                            a rdfs:Datatype ;
+                            owl:onDatatype xsd:decimal ;
+                            owl:withRestrictions ( [ xsd:minInclusive "10.0"^^xsd:decimal ] )
+                        ]
+                      ] )
+              ]
+            ] )
+    ] .
+
+eh:AlimentDurable a owl:Class ;
+    rdfs:label "Aliment durable"@fr ;
+    rdfs:comment "Aliment à faible empreinte carbone et produit localement."@fr ;
+    owl:equivalentClass [
+        a owl:Class ;
+        owl:intersectionOf ( eh:AlimentFaibleCarbone
+            [ a owl:Restriction ; owl:onProperty eh:estLocal ; owl:hasValue true ] )
+    ] .

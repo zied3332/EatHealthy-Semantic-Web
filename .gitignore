@@ -9,3 +9,4 @@ __pycache__/
 node_modules/
 dist/
 "@ | Set-Content .gitignore
+ontology/demo/

@@ -12,8 +12,14 @@ Modules:
     - Recommendations: Personalized food recommendations using SPARQL.
 """
 
+from pathlib import Path
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+# Load backend/.env (Groq settings) before the routers are imported.
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 from backend.routers import (
     foods,
@@ -22,6 +28,7 @@ from backend.routers import (
     recommendations,
     users,
 )
+from backend.routers import impacts
 
 
 # ============================================================
@@ -77,6 +84,9 @@ app.include_router(recommendations.router)
 
 # Authentication and user management.
 app.include_router(users.router)
+
+# Environmental impacts of foods (module "Gestion des aliments").
+app.include_router(impacts.router)
 
 
 # ============================================================

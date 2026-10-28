@@ -18,6 +18,7 @@ export const navigation = [
   { label: "Home", path: "/", icon: House },
   { label: "My Profile", path: "/profile", icon: UserRound },
   { label: "Food Explorer", path: "/foods", icon: Apple },
+  { label: "Environmental Impact", path: "/impacts", icon: Leaf },
   { label: "Dietary Preferences", path: "/diets", icon: ShieldCheck },
   { label: "Recommendations", path: "/recommendations", icon: Sparkles },
   { label: "AI Assistant", path: "/assistant", icon: MessageCircle },
