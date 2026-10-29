@@ -1,0 +1,29 @@
+/* Styles of the Meals page (module "Repas"); the rest comes from Foods/aliments.css. */
+
+.meal-foods { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.impacts-add .meal-food {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  padding: 9px 11px;
+  border: 1px solid #dce9de;
+  border-radius: 11px;
+  background: #fff;
+  cursor: pointer;
+}
+.impacts-add .meal-food.chosen { border-color: #278b4d; background: #edf8ef; }
+.impacts-add .meal-food input { min-height: auto; width: 16px; height: 16px; accent-color: #278b4d; }
+.meal-food small { width: 100%; color: #708477; font-size: 11px; font-weight: 600; }
+
+.meal-totals { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; margin: 14px 0 0; }
+.meal-totals div { padding: 9px 11px; border-radius: 11px; background: #f5fbf1; }
+.meal-totals dt { color: #708477; font-size: 11px; font-weight: 750; text-transform: uppercase; }
+.meal-totals dd { margin: 3px 0 0; color: #213c29; font-size: 18px; font-weight: 800; }
+.meal-totals small { color: #708477; font-size: 11px; font-weight: 600; }
+
+.meal-buttons { display: flex; gap: 10px; margin-top: 14px; }
+.meal-list { display: grid; gap: 14px; }
+.meal-card-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.meal-card-head .eh-badge { margin-right: 6px; }
+.meal-card-head h3 { margin: 8px 0 0; color: #213c29; font-size: 18px; }

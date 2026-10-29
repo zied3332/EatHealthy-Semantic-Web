@@ -48,6 +48,7 @@ import AdminUsers from "./pages/AdminUsers/AdminUsers";
 import ProfileEdit from "./pages/ProfileEdit/ProfileEdit";
 import Impacts from "./pages/Impacts/Impacts";
 import Nutrients from "./pages/Nutrients/Nutrients";
+import Meals from "./pages/Meals/Meals";
 
 // ============================================================
 // TEMPORARY PLACEHOLDER
@@ -116,6 +117,7 @@ function App() {
         <Routes>
           <Route element={<ProtectedLayout />}>
             <Route path="/nutrients" element={<Nutrients />} />
+            <Route path="/meals" element={<Meals />} />
             <Route path="/foods/:foodName/nutrients" element={<NutrientFoodRedirect />} />
             {/* HEALTH PROFILE */}
             <Route

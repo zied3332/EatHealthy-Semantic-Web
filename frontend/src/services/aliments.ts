@@ -33,14 +33,27 @@ export interface Impact {
   source: string | null;
 }
 
+/** The NLP steps of one question (spaCy, PhraseMatcher + difflib, TF-IDF + logistic regression). */
+export interface NlpAnalysis {
+  tokens: { text: string; lemma: string; pos: string }[];
+  entities: { text: string; type: string; id: string; corrected: boolean }[];
+  masked: string;
+  intent: string | null;
+  confidence: number;
+  top_intents: { intent: string; probability: number }[];
+  slots: Record<string, unknown>;
+  tools: string[];
+}
+
 export interface AskResponse {
-  mode: "groq" | "example" | "none";
+  mode: "nlp";
   sparql: string | null;
   explanation: string | null;
   kind: "select" | "ask" | null;
   columns: string[];
   rows: Record<string, string | number | boolean | null>[];
   answer: string;
+  nlp: NlpAnalysis;
 }
 
 /** Same thresholds as the OWL classes AlimentFaibleCarbone and AlimentFortCarbone. */
@@ -95,6 +108,6 @@ export const deleteImpact = (id: string) => api.delete(`/api/impacts/${encodeURI
 export const getExamples = () =>
   api.get<{ questions: string[] }>("/api/foods/ask/examples").then((r) => r.data.questions);
 
-/** Groq + one retry can take longer than the default 10 s timeout. */
+/** The first question also loads the food names, so allow more than the default 10 s. */
 export const askFoods = (question: string) =>
   api.post<AskResponse>("/api/foods/ask", { question }, { timeout: 30000 }).then((r) => r.data);
