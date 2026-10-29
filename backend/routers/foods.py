@@ -3,7 +3,7 @@ Food API routes for EatHealthy.
 
 Retrieves food individuals, categories, and semantic
 properties from the ontology using SPARQL.
-Module "Gestion des aliments": food CRUD (admin) and the AI question box.
+Module "Gestion des aliments": food CRUD (admin) and the NLP question box.
 """
 
 import re
@@ -90,7 +90,7 @@ async def get_foods():
     }
 
 
-# ---------------------------------------------------------------- AI question box
+# ---------------------------------------------------------------- NLP question box
 
 @router.get("/ask/examples")
 async def get_examples():
@@ -100,7 +100,7 @@ async def get_examples():
 
 @router.post("/ask")
 async def ask(body: Question, account: dict = Depends(current_account)):
-    """Question -> Groq writes SPARQL -> Fuseki runs it -> answer."""
+    """Question -> NLP (spaCy + scikit-learn) -> SPARQL template -> Fuseki -> answer."""
     return await nl2sparql.answer(body.question)
 
 
@@ -203,6 +203,7 @@ async def create_food(body: FoodCreate, admin: dict = Depends(require_admin)):
         raise HTTPException(status_code=409, detail=f"The ID '{food_id}' is already used.")
     fields = body.model_dump(exclude={"name", "category"})
     await execute_sparql_update(q.insert_food(food_id, body.category, {"label": body.name.strip(), **fields}))
+    await nl2sparql.refresh()   # the question box now knows this food
     return {"id": food_id, "message": f"Food '{body.name}' created."}
 
 
@@ -215,6 +216,7 @@ async def update_food(food_id: str, body: FoodUpdate, admin: dict = Depends(requ
     if not changes:
         raise HTTPException(status_code=400, detail="Nothing to change.")
     await execute_sparql_update(q.update_food(food_id, changes))
+    await nl2sparql.refresh()
     return {"id": food_id, "message": f"Food '{food_id}' updated."}
 
 
@@ -222,4 +224,5 @@ async def update_food(food_id: str, body: FoodUpdate, admin: dict = Depends(requ
 async def delete_food(food_id: str, admin: dict = Depends(require_admin)):
     await ensure_food(food_id)
     await execute_sparql_update(q.delete_food(food_id))
+    await nl2sparql.refresh()
     return {"id": food_id, "message": f"Food '{food_id}' deleted."}

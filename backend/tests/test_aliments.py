@@ -1,11 +1,11 @@
-"""Important tests of the food module (run: python -m pytest backend/tests -q): rdflib, API, AI box, HermiT."""
+"""Important tests of the food module (run: python -m pytest backend/tests -q): rdflib, NLP box, API, HermiT."""
 
 import asyncio
 import json
 import shutil
+import socket
 from pathlib import Path
 
-import groq
 import httpx
 import pytest
 from fastapi.testclient import TestClient
@@ -16,7 +16,7 @@ from backend.auth import create_access_token
 from backend.main import app
 from backend.queries import aliments as q
 from backend.scripts import check_aliments, setup_aliments
-from backend.services import nl2sparql
+from backend.services import nl2sparql, nlp_aliments
 from backend.services.fuseki_service import FUSEKI_ENDPOINT
 
 ONTOLOGY = Path(__file__).resolve().parents[2] / "ontology"
@@ -98,7 +98,7 @@ def test_impact_crud_and_ranking_on_rdflib():
     assert (None, None, EH.CO2_DatteDegletNour) not in graph and not table(graph, q.is_impact("CO2_DatteDegletNour"))
 
 
-# ---------------------------------------------------------------- AI box (no network)
+# ---------------------------------------------------------------- NLP question box (no LLM, no network)
 EXPECTED = [  # section 6 of the module spec, with the date
     [("Pomme", 0.43), ("Datte Deglet Nour", 1.05)], [("Bœuf", 99.48)], [("Fromage", 5605.2)],
     [("Viande", 54.68), ("Poisson", 13.63), ("ProduitLaitier", 13.52), ("Cereale", 1.57), ("Legume", 1.15), ("Fruit", 0.78)],
@@ -107,14 +107,89 @@ EXPECTED = [  # section 6 of the module spec, with the date
 ]
 
 
-def test_demo_queries_give_the_expected_answers():
+@pytest.fixture
+def offline(monkeypatch):
+    """In-memory Fuseki with the demo data and the date, and no network except this computer."""
     graph = offline_graph()
-    for (question, sparql, _), expected in zip(nl2sparql.DEMO, EXPECTED):
-        rows = table(graph, nl2sparql.check(sparql))
-        if isinstance(rows, list):   # drop the ID column, round the numbers
-            rows = [tuple(float(nl2sparql.number(v)) if isinstance(v, float) else v
-                          for k, v in r.items() if k != "aliment") for r in rows]
-        assert rows == expected, question
+    connect = socket.socket.connect
+
+    def local_only(sock, address):
+        if isinstance(address, tuple) and address[0] not in ("127.0.0.1", "::1", "localhost"):
+            raise OSError(f"No network in the tests: {address}")
+        return connect(sock, address)
+
+    async def fetch(query):
+        return json.loads(graph.query(query).serialize(format="json"))
+    monkeypatch.setattr(socket.socket, "connect", local_only)
+    monkeypatch.setattr(nl2sparql, "fetch", fetch)
+    asyncio.run(nl2sparql.refresh())
+    yield graph
+    nl2sparql.nlp.set_vocabulary([])   # the next real question reloads the foods from Fuseki
+
+
+def ask(question: str) -> dict:
+    return asyncio.run(nl2sparql.answer(question))
+
+
+def summary(out: dict):
+    """The boolean of an ASK, or the rows without the ID column, numbers rounded."""
+    if out["kind"] == "ask":
+        return out["boolean"]
+    return [tuple(float(nl2sparql.number(v)) if isinstance(v, float) else v for k, v in r.items() if k != "aliment")
+            for r in out["rows"]]
+
+
+def test_classifier_accuracy():
+    accuracy = nl2sparql.nlp.cross_validation()
+    print(f"\nIntent classifier, grouped 5-fold cross-validation: {accuracy:.1%} "
+          f"({len(nl2sparql.nlp.texts)} phrases)")
+    assert accuracy >= 0.85
+
+
+def test_demo_questions(offline):
+    assert nl2sparql.demo_questions() == nl2sparql.DEMO
+    for question, expected in zip(nl2sparql.DEMO, EXPECTED):
+        out = ask(question)
+        assert summary(out) == expected, question
+        assert out["mode"] == "nlp" and out["sparql"].endswith(("LIMIT 50", "LIMIT 1", "}"))
+        assert out["nlp"]["tools"] == nlp_aliments.TOOLS and out["nlp"]["masked"]
+
+
+@pytest.mark.parametrize("question, intent, expected", [
+    ("Quelle est l'empreinte carbone de la pomme ?", "value", [("Pomme", 0.43)]),
+    ("Combien de calories dans la banane ?", "value", [("Banane", 89)]),
+    ("Quel fruit consomme le moins d'eau ?", "extreme", [("Banane", 114.5)]),
+    ("Le bœuf est-il durable ?", "yes_no", False),
+    ("Quels aliments ont plus de 10 kg de CO2 ?", "list", [("Saumon", 13.63), ("Fromage", 23.88), ("Bœuf", 99.48)]),
+    ("Compare la pomme et le boeuf", "compare", [("Pomme", 0.43, 180.1, 52), ("Bœuf", 99.48, 1451.2, None)]),
+    ("Parle-moi du saumon", "details", [("Saumon", "Poisson", "Saumon", 208, 8.5, False, False, 13.63, 3691.3)]),
+])
+def test_new_questions(offline, question, intent, expected):
+    out = ask(question)
+    assert out["nlp"]["intent"] == intent and summary(out) == expected
+
+
+def test_typos(offline):
+    out = ask("Quels fruis locaux ont une faible empreinte carbonne ?")
+    assert summary(out) == EXPECTED[0]
+    assert [e["text"] for e in out["nlp"]["entities"] if e["corrected"]] == ["fruis", "carbonne"]
+    assert summary(ask("empreinte carbone de la pome")) == [("Pomme", 0.43)]
+
+
+def test_new_food_without_retraining(offline):
+    classifier, question = nl2sparql.nlp.classifier, "Quelle est l'empreinte carbone de la datte deglet nour ?"
+    offline.update(q.delete_food("DatteDegletNour"))
+    asyncio.run(nl2sparql.refresh())
+    assert ask(question)["sparql"] is None   # unknown food: no query
+    offline.update(q.insert_food("DatteDegletNour", "Fruit", {"label": "Datte Deglet Nour", "local": True}))
+    offline.update(q.insert_impact("DatteDegletNour", "EmpreinteCarbone", 1.05, q.DEFAULT_SOURCE))
+    asyncio.run(nl2sparql.refresh())
+    assert summary(ask(question)) == [("Datte Deglet Nour", 1.05)] and nl2sparql.nlp.classifier is classifier
+
+
+def test_out_of_scope(offline):
+    out = ask("Quel temps fait-il à Tunis ?")
+    assert (out["sparql"], out["kind"], out["answer"]) == (None, None, nl2sparql.NOT_UNDERSTOOD)
 
 
 @pytest.mark.parametrize("bad", ["INSERT DATA { eh:X a eh:Fruit }", "DELETE WHERE { ?s ?p ?o }", "hello",
@@ -129,48 +204,6 @@ def test_check_rejects_unsafe_queries(bad):
 def test_check_adds_limit_and_ignores_strings():
     query = nl2sparql.check('PREFIX eh: <http://wrong#> SELECT ?copy WHERE { ?copy rdfs:label "Delete me" }')
     assert query.endswith("LIMIT 50") and "wrong" not in query
-
-
-@pytest.fixture
-def fake_ai(monkeypatch):
-    """Fake Groq replies and an in-memory Fuseki."""
-    graph, replies = offline_graph(), []
-    monkeypatch.setenv("GROQ_API_KEY", "test")
-
-    async def chat(messages):
-        reply = replies.pop(0)
-        if isinstance(reply, Exception):
-            raise reply
-        return reply
-
-    async def fetch(query):
-        return json.loads(graph.query(query).serialize(format="json"))
-    monkeypatch.setattr(nl2sparql, "chat", chat)
-    monkeypatch.setattr(nl2sparql, "fetch", fetch)
-    return replies
-
-
-def reply(sparql, language="fr"):
-    return json.dumps({"sparql": sparql, "explanation": "Test.", "language": language})
-
-
-def test_ai_answer_with_one_retry_and_out_of_scope(fake_ai):
-    fake_ai += [reply("DELETE WHERE { ?s ?p ?o }"), reply("SELECT (COUNT(?a) AS ?n) WHERE { ?a a eh:Fruit }")]
-    out = asyncio.run(nl2sparql.answer("Combien de fruits ?"))
-    assert (out["mode"], out["answer"], out["kind"]) == ("groq", "Résultat : 3", "select")
-    assert out["sparql"].endswith("LIMIT 50") and fake_ai == []
-    fake_ai.append(json.dumps({"sparql": "", "explanation": "Only foods, sorry.", "language": "en"}))
-    out = asyncio.run(nl2sparql.answer("Who won the World Cup?"))   # out of scope: no query is run
-    assert (out["answer"], out["kind"]) == ("Only foods, sorry.", None)
-
-
-def test_ai_busy_uses_saved_query_or_says_busy(fake_ai):
-    busy = groq.APIConnectionError(request=httpx.Request("POST", "https://api.groq.com"))
-    fake_ai += [busy, busy]
-    saved = asyncio.run(nl2sparql.answer("Which foods are sustainable?"))
-    assert saved["mode"] == "example" and saved["answer"].startswith("I found 5 results: Pomme (0.43)")
-    other = asyncio.run(nl2sparql.answer("Quel est le meilleur fromage ?"))
-    assert (other["mode"], other["answer"], other["kind"]) == ("none", nl2sparql.BUSY, None)
 
 
 # ---------------------------------------------------------------- API on the real Fuseki

@@ -1,4 +1,4 @@
-/* Styles of the food module ("Gestion des aliments"): badges, buttons, form, AI box, Impacts page. */
+/* Styles of the food module ("Gestion des aliments"): badges, buttons, form, question box, Impacts page. */
 
 /* ---------------------------------------------------------------- badges and notes */
 
@@ -142,7 +142,7 @@
 .eh-table th { color: #708477; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
 .eh-table a { color: #1d713c; font-weight: 700; }
 
-/* ---------------------------------------------------------------- AI box */
+/* ---------------------------------------------------------------- question box (NLP) */
 
 .ask-box {
   margin-top: 24px;
@@ -193,6 +193,27 @@
   white-space: pre-wrap;
   box-sizing: border-box;
 }
+
+/* NLP analysis panel (5 steps) */
+.nlp-panel { width: 100%; border-top: 1px solid #e0eae2; padding-top: 10px; }
+.nlp-panel summary { color: #213c29; font-weight: 750; cursor: pointer; }
+.nlp-panel ol { display: grid; gap: 12px; margin: 10px 0 0; padding-left: 22px; color: #24352a; font-size: 13px; }
+.nlp-panel .eh-muted { margin: 0 0 0 6px; }
+.nlp-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.nlp-chip { padding: 4px 8px; border: 1px solid #dce9de; border-radius: 8px; background: #f7fbf8; font-size: 12px; }
+.nlp-chip small { margin-left: 4px; color: #708477; font-size: 10px; font-weight: 750; }
+.nlp-chip.entity { border-color: transparent; font-weight: 700; }
+.nlp-chip.food { background: #e8f7ec; color: #23803f; }
+.nlp-chip.category { background: #e8effc; color: #2a55a8; }
+.nlp-chip.impact { background: #fff0e4; color: #a24a0e; }
+.nlp-chip.attribute { background: #f1ebff; color: #5d36b8; }
+.nlp-chip.diet { background: #e6f6f6; color: #1d6d6d; }
+.nlp-chip.level { background: #fff6e0; color: #93600a; }
+.nlp-masked { display: block; margin-top: 6px; padding: 6px 9px; border-radius: 8px; background: #f0f4f1; overflow-wrap: anywhere; }
+.nlp-intent { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin: 6px 0 0; font-size: 15px; font-weight: 750; }
+.nlp-intent span { color: #23803f; }
+.nlp-intent small { color: #708477; font-size: 12px; font-weight: 600; }
+.nlp-panel .ask-sparql { margin-top: 6px; }
 
 /* ---------------------------------------------------------------- Impacts page */
 

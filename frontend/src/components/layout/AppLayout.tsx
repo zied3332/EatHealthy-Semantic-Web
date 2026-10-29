@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Sparkles,
   MessageCircle,
+  UtensilsCrossed,
 } from "lucide-react";
 
 import "./AppLayout.css";
@@ -20,6 +21,7 @@ export const navigation = [
   { label: "My Profile", path: "/profile", icon: UserRound },
   { label: "Food Explorer", path: "/foods", icon: Apple },
   { label: "Nutriments", path: "/nutrients", icon: Sprout },
+  { label: "Meals", path: "/meals", icon: UtensilsCrossed },
   { label: "Environmental Impact", path: "/impacts", icon: Leaf },
   { label: "Dietary Preferences", path: "/diets", icon: ShieldCheck },
   { label: "Recommendations", path: "/recommendations", icon: Sparkles },

@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Load backend/.env (Groq settings) before the routers are imported.
+# Load backend/.env (API keys) before the routers are imported.
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
 from backend.routers import (
@@ -28,7 +28,7 @@ from backend.routers import (
     recommendations,
     users,
 )
-from backend.routers import impacts, nutrients
+from backend.routers import impacts, meals, nutrients
 
 
 # ============================================================
@@ -88,6 +88,7 @@ app.include_router(users.router)
 # Environmental impacts of foods (module "Gestion des aliments").
 app.include_router(impacts.router)
 app.include_router(nutrients.router)
+app.include_router(meals.router)
 
 
 # ============================================================
