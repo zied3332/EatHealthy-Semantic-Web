@@ -904,6 +904,20 @@
   }
 }
 
+.food-environment-panel { background: linear-gradient(135deg, #fff 30%, #f5faf6); }
+.food-environment-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; }
+.food-environment-heading h2 { margin: 8px 0 0; }
+.food-environment-emblem { display: inline-flex; width: 48px; height: 48px; align-items: center; justify-content: center; background: #e5f4e9; color: #278b4d; border-radius: 15px; flex-shrink: 0; }
+.food-environment-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 20px 0; }
+.food-environment-metric { display: flex; flex-direction: column; gap: 12px; padding: 20px; border: 1px solid #e1ece4; background: #f4f9f5; border-radius: 14px; min-width: 0; }
+.food-environment-metric.water { background: #f1f8fc; border-color: #dfedf5; }
+.food-environment-label { display: flex; gap: 8px; align-items: center; font-size: 13px; color: #527360; }
+.water .food-environment-label { color: #4c7d9a; }
+.food-environment-metric strong { color: #153f2d; font-size: clamp(21px, 3vw, 30px); line-height: 1.2; overflow-wrap: anywhere; }
+.food-environment-unit { font-size: 12px; color: #7a9183; }
+.food-environment-link { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; color: #278b4d; text-decoration: none; padding: 10px 0 0; }
+.food-environment-link:hover { text-decoration: underline; }
+@media (max-width: 480px) { .food-environment-metrics { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) {
   .food-details-semantic-group,
   .food-details-semantic-group

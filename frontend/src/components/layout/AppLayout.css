@@ -6,6 +6,12 @@
 }
 
 .app-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100dvh;
+  box-sizing: border-box;
+  overflow-y: auto;
   width: 260px;
   min-height: 100vh;
   background: #ffffff;
@@ -106,6 +112,9 @@
   }
 
   .app-sidebar {
+    position: static;
+    height: auto;
+    overflow-y: visible;
     width: 100%;
     min-height: auto;
     padding: 16px;

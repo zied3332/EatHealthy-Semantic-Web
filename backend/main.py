@@ -28,7 +28,7 @@ from backend.routers import (
     recommendations,
     users,
 )
-from backend.routers import impacts
+from backend.routers import impacts, nutrients
 
 
 # ============================================================
@@ -87,6 +87,7 @@ app.include_router(users.router)
 
 # Environmental impacts of foods (module "Gestion des aliments").
 app.include_router(impacts.router)
+app.include_router(nutrients.router)
 
 
 # ============================================================

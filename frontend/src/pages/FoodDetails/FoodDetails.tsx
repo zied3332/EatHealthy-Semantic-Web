@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import api from "../../services/api";
+import Nutrients from "../Nutrients/Nutrients";
 import { useAuth } from "../../context/AuthContext";
 import { ADMIN_ONLY, co2Badge, deleteFood, errorMessage } from "../../services/aliments";
 import type { FoodSummary } from "../../services/aliments";
@@ -75,35 +76,35 @@ const nutritionFields: NutritionField[] = [
   },
   {
     key: "aProteines",
-    label: "Proteins",
+    label: "Protéines",
     unit: "",
     icon: ShieldCheck,
     className: "proteins",
   },
   {
     key: "aGlucides",
-    label: "Carbohydrates",
+    label: "Glucides",
     unit: "",
     icon: Wheat,
     className: "carbs",
   },
   {
     key: "aLipides",
-    label: "Fats",
+    label: "Lipides",
     unit: "",
     icon: Droplets,
     className: "fats",
   },
   {
     key: "aFibres",
-    label: "Fiber",
+    label: "Fibres",
     unit: "",
     icon: Sprout,
     className: "fiber",
   },
   {
     key: "aSucre",
-    label: "Sugar",
+    label: "Sucres",
     unit: "",
     icon: Leaf,
     className: "sugar",
@@ -693,18 +694,21 @@ export default function FoodDetails() {
         <main className="food-details-main">
           {/* ENVIRONMENTAL IMPACT (read-only; the CRUD is on the Impacts page) */}
 
-          <section className="food-details-panel">
-            <span className="food-details-section-kicker">ENVIRONMENT</span>
-            <h2>Environmental impact</h2>
+          <section className="food-details-panel food-environment-panel">
+            <div className="food-environment-heading"><div>
+            <span className="food-details-section-kicker">ENVIRONNEMENT</span>
+            <h2>Impact environnemental</h2></div><span className="food-environment-emblem"><Leaf size={23} /></span></div>
             <div className="eh-badges">
               <span className={co2Badge(food.co2 ?? null).className} title={co2Badge(food.co2 ?? null).title}>
                 {co2Badge(food.co2 ?? null).label}
               </span>
               {food.sustainable && <span className="eh-badge sustainable">Sustainable</span>}
             </div>
-            <p>Carbon: <strong>{food.co2 != null ? `${food.co2} kg CO2e/kg` : "not set"}</strong></p>
-            <p>Water: <strong>{food.water != null ? `${food.water} L/kg` : "not set"}</strong></p>
-            <Link className="eh-link" to="/impacts">Manage impacts →</Link>
+            <div className="food-environment-metrics">
+              <div className="food-environment-metric carbon"><span className="food-environment-label"><Leaf size={17} /> Empreinte carbone</span><strong>{food.co2 != null ? food.co2.toLocaleString("fr-FR") : "Non renseignée"}</strong><span className="food-environment-unit">kg CO₂e / kg d’aliment</span></div>
+              <div className="food-environment-metric water"><span className="food-environment-label"><Droplets size={17} /> Empreinte eau</span><strong>{food.water != null ? food.water.toLocaleString("fr-FR") : "Non renseignée"}</strong><span className="food-environment-unit">litres / kg d’aliment</span></div>
+            </div>
+            <Link className="food-environment-link" to="/impacts">{user?.role === "admin" ? "Gérer les impacts" : "Explorer les impacts"}<ArrowUpRight size={16} /></Link>
           </section>
 
           {/* ================================================
@@ -719,18 +723,17 @@ export default function FoodDetails() {
                 </span>
 
                 <h2>
-                  Nutritional information
+                  Énergie et nutriments par catégorie
                 </h2>
 
                 <p>
-                  Values retrieved directly
-                  from the EatHealthy ontology.
+                  Catégories, nutriments et valeurs récupérés depuis la base de données.
                 </p>
               </div>
             </div>
 
             <div className="food-details-nutrition-grid">
-              {nutrients.map(
+              {nutrients.filter(nutrient => nutrient.key === "aCalories" && nutrient.values.length > 0).map(
                 (nutrient) => {
                   const Icon =
                     nutrient.icon;
@@ -777,7 +780,7 @@ export default function FoodDetails() {
                           )
                         ) : (
                           <span className="food-details-no-value">
-                            Not available
+                            Non renseigné
                           </span>
                         )}
                       </div>
@@ -796,13 +799,9 @@ export default function FoodDetails() {
             </div>
 
             <p className="food-details-data-note">
-              Measurement units and
-              serving sizes have not
-              been confirmed in the
-              ontology response.
-              Multiple values are
-              displayed separately.
+              Les calories représentent l’énergie. Les nutriments sont regroupés par catégorie ci-dessous.
             </p>
+            <Nutrients key={food.name} embeddedFood={food.name} onSaved={() => setReloadKey(k => k + 1)} />
           </section>
 
           {/* ================================================

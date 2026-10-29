@@ -4,6 +4,7 @@ import {
   Navigate,
   Routes,
   Route,
+  useParams,
 } from "react-router-dom";
 
 import AppLayout from "./components/layout/AppLayout";
@@ -46,6 +47,7 @@ import Register from "./pages/Auth/Register";
 import AdminUsers from "./pages/AdminUsers/AdminUsers";
 import ProfileEdit from "./pages/ProfileEdit/ProfileEdit";
 import Impacts from "./pages/Impacts/Impacts";
+import Nutrients from "./pages/Nutrients/Nutrients";
 
 // ============================================================
 // TEMPORARY PLACEHOLDER
@@ -70,6 +72,11 @@ function ProtectedLayout() {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
   return user.role === "admin" ? <AppLayout /> : <ClientLayout />;
+}
+
+function NutrientFoodRedirect() {
+  const { foodName } = useParams();
+  return <Navigate to={`/foods/${encodeURIComponent(foodName || "")}`} replace />;
 }
 
 function HomeRoute() {
@@ -108,6 +115,8 @@ function App() {
         <ProfileProvider>
         <Routes>
           <Route element={<ProtectedLayout />}>
+            <Route path="/nutrients" element={<Nutrients />} />
+            <Route path="/foods/:foodName/nutrients" element={<NutrientFoodRedirect />} />
             {/* HEALTH PROFILE */}
             <Route
               path="/profile"
