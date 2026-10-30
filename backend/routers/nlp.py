@@ -145,3 +145,139 @@ async def query_nlp(body: NLPQuestion):
         "confidence": food_result["nlp"].get("confidence"),
         "boolean": food_result.get("boolean"),
     }
+# ============================================================
+# SEMANTIC MEAL PLANNER
+# ============================================================
+
+from fastapi import Query
+
+MEAL_PLANNER_PREFIX = """
+PREFIX eh: <http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+"""
+
+
+@router.get("/meal-plan")
+async def get_meal_plan(
+    objective: str = Query(default="weight_loss"),
+):
+    """
+    Generate a daily meal plan from the RDF ontology.
+
+    The endpoint retrieves existing meals from Fuseki.
+    It does not invent foods or nutritional quantities.
+    """
+
+    objectives = {
+        "weight_loss": "ObjectifPertePoids1",
+    }
+
+    if objective not in objectives:
+        raise HTTPException(
+            status_code=422,
+            detail="Objectif non pris en charge.",
+        )
+
+    objective_id = objectives[objective]
+
+    sparql = MEAL_PLANNER_PREFIX + f"""
+    SELECT
+        ?type
+        ?repas
+        (GROUP_CONCAT(DISTINCT ?nomAliment; separator=", ") AS ?aliments)
+    WHERE {{
+        VALUES ?type {{
+            eh:PetitDejeuner
+            eh:Dejeuner
+            eh:Diner
+        }}
+
+        ?repas a ?type ;
+               eh:repasAdapteAObjectif eh:{objective_id} ;
+               eh:contientAliment ?aliment .
+
+        BIND(
+            REPLACE(STR(?aliment), "^.*[#/]", "")
+            AS ?nomAliment
+        )
+    }}
+    GROUP BY ?type ?repas
+    ORDER BY ?type ?repas
+    """
+
+    try:
+        bindings = await execute_sparql(sparql)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="Impossible d'interroger Fuseki.",
+        ) from exc
+
+    rows = format_bindings(bindings)
+
+    categories = {
+        "PetitDejeuner": {
+            "label": "Petit-déjeuner",
+            "icon": "sunrise",
+            "options": [],
+        },
+        "Dejeuner": {
+            "label": "Déjeuner",
+            "icon": "sun",
+            "options": [],
+        },
+        "Diner": {
+            "label": "Dîner",
+            "icon": "moon",
+            "options": [],
+        },
+    }
+
+    for row in rows:
+        meal_type = row.get("type", "")
+        meal_id = row.get("repas", "")
+        food_string = row.get("aliments", "")
+
+        if meal_type not in categories:
+            continue
+
+        foods = sorted({
+            food.strip()
+            for food in food_string.split(",")
+            if food.strip()
+        })
+
+        categories[meal_type]["options"].append({
+            "id": meal_id,
+            "foods": foods,
+        })
+
+    meals = []
+
+    for meal_type in ["PetitDejeuner", "Dejeuner", "Diner"]:
+        category = categories[meal_type]
+
+        meals.append({
+            "type": meal_type,
+            "label": category["label"],
+            "icon": category["icon"],
+            "options": category["options"],
+            "count": len(category["options"]),
+        })
+
+    return {
+        "objective": objective,
+        "title": "Suggestions de repas pour votre journée",
+        "description": (
+            "Repas issus de l'ontologie EatHealthy, "
+            "associés à un objectif de perte de poids."
+        ),
+        "meals": meals,
+        "total_options": sum(meal["count"] for meal in meals),
+        "source": "Apache Jena Fuseki",
+        "disclaimer": (
+            "Suggestions expérimentales basées sur les "
+            "relations RDF. Les portions et les apports "
+            "nutritionnels complets ne sont pas vérifiés."
+        ),
+    }
