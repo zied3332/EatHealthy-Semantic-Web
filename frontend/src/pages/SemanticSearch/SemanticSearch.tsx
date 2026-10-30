@@ -11,9 +11,18 @@ import {
   MessageSquareText,
   ArrowRight,
   Info,
+  AlertCircle,
 } from "lucide-react";
 
 import "./SemanticSearch.css";
+
+// ============================================================
+// CONFIGURATION
+// ============================================================
+
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:8000"
+).replace(/\/$/, "");
 
 // ============================================================
 // EXAMPLE QUESTIONS
@@ -21,8 +30,12 @@ import "./SemanticSearch.css";
 
 const EXAMPLES = [
   {
+    label: "Omnivore users",
+    question: "Quels utilisateurs suivent un régime omnivore ?",
+  },
+  {
     label: "Vegetarian users",
-    question: "Quels utilisateurs suivent un régime végétarien ?",
+    question: "Qui sont les personnes végétariennes ?",
   },
   {
     label: "Muscle gain",
@@ -33,33 +46,115 @@ const EXAMPLES = [
     question: "Quels utilisateurs veulent perdre du poids ?",
   },
   {
-    label: "Protein-rich foods",
-    question: "Quels aliments sont riches en protéines ?",
+    label: "Combined search",
+    question:
+      "Quels utilisateurs sont omnivores et souhaitent perdre du poids ?",
+  },
+  {
+    label: "Count fruits",
+    question: "Combien de fruits y a-t-il ?",
   },
 ];
-
-// ============================================================
-// DEMONSTRATION QUERY
-// ============================================================
-
-const VEGETARIAN_SPARQL = `PREFIX eh: <http://www.semanticweb.org/thinkpad/ontologies/2026/9/EatHealthy#>
-
-SELECT DISTINCT ?person
-WHERE {
-  ?person a eh:Personne ;
-          eh:suitRegime eh:RegimeVegetarien1 .
-}`;
 
 // ============================================================
 // TYPES
 // ============================================================
 
+type ResultValue = string | number | boolean | null;
+
+interface FoodEntity {
+  text?: string;
+  type?: string;
+  id?: string;
+  corrected?: boolean;
+}
+
+interface HealthEntities {
+  individual?: string;
+  label?: string;
+  secondary_individual?: string | null;
+  secondary_label?: string | null;
+}
+
 interface SearchResult {
   question: string;
+  domain: string;
   intent: string;
+  entities: HealthEntities | FoodEntity[];
   sparql: string;
-  rows: Record<string, string>[];
-  isPreview: boolean;
+  results: Record<string, ResultValue>[];
+  count: number;
+  answer?: string | null;
+  confidence?: number | null;
+  boolean?: boolean | null;
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function formatValue(value: ResultValue): string {
+  if (value === null || value === undefined) {
+    return "—";
+  }
+
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+
+  const text = String(value);
+
+  if (text.includes("#")) {
+    return text.split("#").pop() || text;
+  }
+
+  return text;
+}
+
+function getErrorMessage(
+  status: number,
+  detail: unknown
+): string {
+  if (typeof detail === "string") {
+    return detail;
+  }
+
+  if (status === 422) {
+    return "Question non reconnue. Essayez une autre formulation.";
+  }
+
+  if (status === 502) {
+    return "Impossible de communiquer avec Apache Jena Fuseki.";
+  }
+
+  return `La requête a échoué (HTTP ${status}).`;
+}
+
+function getEntityLabels(
+  entities: SearchResult["entities"]
+): string[] {
+  if (Array.isArray(entities)) {
+    return entities.map((entity) => {
+      const label = entity.text || entity.id || "Unknown";
+
+      return entity.type
+        ? `${label} (${entity.type})`
+        : label;
+    });
+  }
+
+  return [
+    entities.label,
+    entities.secondary_label,
+  ].filter((value): value is string => Boolean(value));
+}
+
+function getColumns(
+  rows: SearchResult["results"]
+): string[] {
+  return Array.from(
+    new Set(rows.flatMap((row) => Object.keys(row)))
+  );
 }
 
 // ============================================================
@@ -71,49 +166,56 @@ export default function SemanticSearch() {
   const [result, setResult] = useState<SearchResult | null>(
     null
   );
-
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // ==========================================================
-  // FRONTEND PREVIEW SEARCH
+  // NLP SEARCH
   // ==========================================================
 
-  function handleSearch() {
+  async function handleSearch() {
     const text = question.trim();
 
-    if (!text) return;
+    if (!text || loading) return;
 
     setLoading(true);
     setResult(null);
     setCopied(false);
+    setError(null);
 
-    const normalized = text.toLowerCase();
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/nlp/query`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question: text,
+          }),
+        }
+      );
 
-    const isVegetarian =
-      normalized.includes("végétarien") ||
-      normalized.includes("vegetarian") ||
-      normalized.includes("vegetarien");
+      const data = await response.json();
 
-    if (isVegetarian) {
-      setResult({
-        question: text,
-        intent: "Search people by dietary regime",
-        sparql: VEGETARIAN_SPARQL,
-        rows: [],
-        isPreview: true,
-      });
-    } else {
-      setResult({
-        question: text,
-        intent: "Awaiting NLP backend analysis",
-        sparql: "",
-        rows: [],
-        isPreview: true,
-      });
+      if (!response.ok) {
+        throw new Error(
+          getErrorMessage(response.status, data.detail)
+        );
+      }
+
+      setResult(data as SearchResult);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred."
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   // ==========================================================
@@ -127,9 +229,35 @@ export default function SemanticSearch() {
       await navigator.clipboard.writeText(result.sparql);
       setCopied(true);
     } catch {
-      setCopied(false);
+      setError("Unable to copy SPARQL to clipboard.");
     }
   }
+
+  // ==========================================================
+  // DERIVED DATA
+  // ==========================================================
+
+  const entityLabels = result
+    ? getEntityLabels(result.entities)
+    : [];
+
+  const columns = result
+    ? getColumns(result.results)
+    : [];
+
+  const confidence =
+    typeof result?.confidence === "number"
+      ? `${(result.confidence * 100).toFixed(1)}%`
+      : null;
+
+  const isFoodDomain = result?.domain === "food_nutrition";
+
+  const aggregateCount =
+    result?.intent === "count" &&
+    result.results.length === 1 &&
+    typeof result.results[0].nombre === "number"
+      ? result.results[0].nombre
+      : null;
 
   // ==========================================================
   // RENDER
@@ -152,9 +280,9 @@ export default function SemanticSearch() {
           <h1>Semantic AI Search</h1>
 
           <p>
-            Explore EatHealthy knowledge using natural
-            language. Ask a question, discover its meaning,
-            and see how it translates into SPARQL.
+            Ask questions in natural language and explore
+            EatHealthy's semantic knowledge graph using
+            spaCy, SPARQL, and Apache Jena Fuseki.
           </p>
         </div>
       </header>
@@ -177,12 +305,11 @@ export default function SemanticSearch() {
           onChange={(event) => {
             setQuestion(event.target.value);
             setResult(null);
+            setError(null);
           }}
-          placeholder="Ex: Quels utilisateurs suivent un régime végétarien ?"
+          placeholder="Ex: Quels utilisateurs suivent un régime omnivore ?"
           rows={4}
         />
-
-        {/* EXAMPLES */}
 
         <div className="semantic-examples">
           <span>Try an example question</span>
@@ -195,6 +322,7 @@ export default function SemanticSearch() {
                 onClick={() => {
                   setQuestion(example.question);
                   setResult(null);
+                  setError(null);
                 }}
               >
                 <Sparkles size={14} />
@@ -203,8 +331,6 @@ export default function SemanticSearch() {
             ))}
           </div>
         </div>
-
-        {/* SEARCH BUTTON */}
 
         <button
           className="semantic-search-button"
@@ -219,9 +345,16 @@ export default function SemanticSearch() {
 
         <p className="semantic-helper-text">
           <Info size={15} />
-          Currently using frontend preview mode.
-          Live NLP and Fuseki integration are coming next.
+          Powered by spaCy NLP and Apache Jena Fuseki.
+          Only supported semantic question types can be analyzed.
         </p>
+
+        {error && (
+          <div className="semantic-error" role="alert">
+            <AlertCircle size={19} />
+            <span>{error}</span>
+          </div>
+        )}
       </section>
 
       {/* RESULTS */}
@@ -233,11 +366,12 @@ export default function SemanticSearch() {
               <span className="semantic-eyebrow">
                 SEMANTIC ANALYSIS
               </span>
+
               <h2>Query analysis</h2>
             </div>
 
             <span className="semantic-preview-badge">
-              Frontend preview
+              Live Fuseki results
             </span>
           </div>
 
@@ -248,11 +382,44 @@ export default function SemanticSearch() {
 
             <div>
               <span>Detected intent</span>
+
               <strong>{result.intent}</strong>
+
+              <span>
+                Domain:{" "}
+                {isFoodDomain
+                  ? "Food & Nutrition"
+                  : "Health Preferences"}
+              </span>
+
+              {entityLabels.length > 0 && (
+                <span>
+                  Entities: {entityLabels.join(" · ")}
+                </span>
+              )}
+
+              {confidence && (
+                <span>
+                  Classifier confidence: {confidence}
+                </span>
+              )}
             </div>
           </div>
 
-          {/* SPARQL */}
+          {/* NATURAL LANGUAGE ANSWER */}
+
+          {result.answer && (
+            <div className="semantic-intent-card">
+              <MessageSquareText size={23} />
+
+              <div>
+                <span>Natural-language answer</span>
+                <strong>{result.answer}</strong>
+              </div>
+            </div>
+          )}
+
+          {/* GENERATED SPARQL */}
 
           <div className="semantic-code-card">
             <div className="semantic-code-header">
@@ -261,32 +428,23 @@ export default function SemanticSearch() {
                 <h3>Generated SPARQL</h3>
               </div>
 
-              {result.sparql && (
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                >
-                  {copied ? (
-                    <Check size={17} />
-                  ) : (
-                    <Copy size={17} />
-                  )}
-                  {copied ? "Copied" : "Copy"}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleCopy}
+              >
+                {copied ? (
+                  <Check size={17} />
+                ) : (
+                  <Copy size={17} />
+                )}
+
+                {copied ? "Copied" : "Copy"}
+              </button>
             </div>
 
-            {result.sparql ? (
-              <pre>
-                <code>{result.sparql}</code>
-              </pre>
-            ) : (
-              <p className="semantic-empty">
-                No SPARQL query generated in preview mode.
-                This question will be analyzed by the NLP
-                backend once connected.
-              </p>
-            )}
+            <pre>
+              <code>{result.sparql}</code>
+            </pre>
           </div>
 
           {/* DATABASE RESULTS */}
@@ -294,20 +452,57 @@ export default function SemanticSearch() {
           <div className="semantic-data-card">
             <div className="semantic-section-title">
               <Database size={21} />
-              <h3>Query results</h3>
+
+              <h3>
+                Query results (
+                {aggregateCount !== null
+                  ? aggregateCount
+                  : result.count}
+                )
+              </h3>
             </div>
 
-            <div className="semantic-empty-state">
-              <Database size={30} />
+            {result.results.length > 0 ? (
+              <div className="semantic-table-wrapper">
+                <table className="semantic-table">
+                  <thead>
+                    <tr>
+                      {columns.map((column) => (
+                        <th key={column}>
+                          {column}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
 
-              <h4>No live results yet</h4>
+                  <tbody>
+                    {result.results.map((row, index) => (
+                      <tr key={index}>
+                        {columns.map((column) => (
+                          <td
+                            key={column}
+                            title={formatValue(row[column])}
+                          >
+                            {formatValue(row[column])}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="semantic-empty-state">
+                <Database size={30} />
 
-              <p>
-                The generated query will be executed against
-                Apache Jena Fuseki once the backend NLP
-                service is connected.
-              </p>
-            </div>
+                <h4>No matching records</h4>
+
+                <p>
+                  The query executed successfully, but
+                  no matching records were found in Fuseki.
+                </p>
+              </div>
+            )}
           </div>
         </section>
       )}

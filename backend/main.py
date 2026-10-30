@@ -12,6 +12,7 @@ Modules:
     - Recommendations: Personalized food recommendations using SPARQL.
     - Users: Authentication and account management.
     - Health Preferences: Health objectives and dietary regimes CRUD.
+    - NLP: Natural language to SPARQL translation using spaCy.
     - Impacts, Nutrients, Meals: Nutrition and environmental data.
 """
 
@@ -44,6 +45,7 @@ from backend.routers import (
     meals,
     nutrients,
     health_preferences,
+    nlp,
 )
 
 
@@ -55,9 +57,9 @@ app = FastAPI(
     title="EatHealthy API",
     description=(
         "Semantic nutrition and personalized food recommendation "
-        "API powered by Apache Jena Fuseki"
+        "API powered by Apache Jena Fuseki and spaCy NLP"
     ),
-    version="0.2.0",
+    version="0.3.0",
 )
 
 
@@ -117,6 +119,10 @@ app.include_router(meals.router)
 # Supports authenticated clients and administrators.
 app.include_router(health_preferences.router)
 
+# NLP: Natural language to SPARQL translation.
+# Uses spaCy to analyze questions and Fuseki to execute queries.
+app.include_router(nlp.router)
+
 
 # ============================================================
 # GENERAL ENDPOINTS
@@ -131,7 +137,7 @@ def home():
     """
     return {
         "message": "Welcome to EatHealthy API",
-        "version": "0.2.0",
+        "version": "0.3.0",
         "modules": [
             "foods",
             "diets",
@@ -139,6 +145,7 @@ def home():
             "recommendations",
             "users",
             "health_preferences",
+            "nlp",
             "impacts",
             "nutrients",
             "meals",
