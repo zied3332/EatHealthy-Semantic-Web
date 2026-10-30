@@ -7,13 +7,11 @@ import {
   useParams,
 } from "react-router-dom";
 
+import type { ReactNode } from "react";
+
 import AppLayout from "./components/layout/AppLayout";
 import ClientLayout from "./components/layout/ClientLayout";
 import PublicLayout from "./components/layout/PublicLayout";
-
-// ============================================================
-// CONTEXT PROVIDERS
-// ============================================================
 
 import { ProfileProvider } from "./context/ProfileContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -22,42 +20,33 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 // PAGES
 // ============================================================
 
-// Home
 import Home from "./pages/Home/Home";
 
-// Health Profile
 import Profile from "./pages/Profile/Profile";
 import ProfileEdit from "./pages/ProfileEdit/ProfileEdit";
 
-// Food Explorer
 import Foods from "./pages/Foods/Foods";
-
-// Food Details
 import FoodDetails from "./pages/FoodDetails/FoodDetails";
 
-// Existing dietary preferences
 import Diets from "./pages/Diets/Diets";
-
-// NEW: Health objectives and dietary regimes CRUD
 import HealthPreferences from "./pages/HealthPreferences/HealthPreferences";
 
-// Personalized Recommendations
+// NEW: Natural Language to SPARQL
+import SemanticSearch from "./pages/SemanticSearch/SemanticSearch";
+
 import Recommendations from "./pages/Recommendations/Recommendations";
 
-// Authentication
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 
-// Administration
 import AdminUsers from "./pages/AdminUsers/AdminUsers";
 
-// Other modules
 import Impacts from "./pages/Impacts/Impacts";
 import Nutrients from "./pages/Nutrients/Nutrients";
 import Meals from "./pages/Meals/Meals";
 
 // ============================================================
-// TEMPORARY PLACEHOLDER
+// PLACEHOLDER
 // ============================================================
 
 function PlaceholderPage({ title }: { title: string }) {
@@ -88,17 +77,17 @@ function ProtectedLayout() {
 }
 
 // ============================================================
-// CLIENT-ONLY ROUTE GUARD
+// CLIENT-ONLY ROUTE
 // ============================================================
 
-function ClientOnly({ children }: { children: React.ReactNode }) {
+function ClientOnly({ children }: { children: ReactNode }) {
   const { user } = useAuth();
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (user.role !== "client") {
+  if (user.role === "admin") {
     return <Navigate to="/admin/users" replace />;
   }
 
@@ -121,7 +110,7 @@ function NutrientFoodRedirect() {
 }
 
 // ============================================================
-// HOME ROUTE
+// HOME
 // ============================================================
 
 function HomeRoute() {
@@ -147,14 +136,13 @@ function HomeRoute() {
 }
 
 // ============================================================
-// APPLICATION
+// APPLICATION ROUTES
 // ============================================================
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        {/* PUBLIC ROUTES */}
         <Routes>
           <Route element={<PublicLayout />}>
             <Route path="/login" element={<Login />} />
@@ -164,14 +152,10 @@ function App() {
           <Route path="/" element={<HomeRoute />} />
         </Routes>
 
-        {/* AUTHENTICATED ROUTES */}
         <ProfileProvider>
           <Routes>
             <Route element={<ProtectedLayout />}>
-              {/* NUTRIENTS */}
               <Route path="/nutrients" element={<Nutrients />} />
-
-              {/* MEALS */}
               <Route path="/meals" element={<Meals />} />
 
               <Route
@@ -179,7 +163,6 @@ function App() {
                 element={<NutrientFoodRedirect />}
               />
 
-              {/* HEALTH PROFILE */}
               <Route path="/profile" element={<Profile />} />
 
               <Route
@@ -187,22 +170,17 @@ function App() {
                 element={<ProfileEdit />}
               />
 
-              {/* FOOD EXPLORER */}
               <Route path="/foods" element={<Foods />} />
 
-              {/* FOOD DETAILS */}
               <Route
                 path="/foods/:foodName"
                 element={<FoodDetails />}
               />
 
-              {/* ENVIRONMENTAL IMPACT */}
               <Route path="/impacts" element={<Impacts />} />
 
-              {/* EXISTING DIETARY PREFERENCES */}
               <Route path="/diets" element={<Diets />} />
 
-              {/* NEW CLIENT HEALTH PREFERENCES CRUD */}
               <Route
                 path="/health-preferences"
                 element={
@@ -212,13 +190,21 @@ function App() {
                 }
               />
 
-              {/* PERSONALIZED RECOMMENDATIONS */}
+              {/* NLP: NATURAL LANGUAGE TO SPARQL */}
+              <Route
+                path="/semantic-search"
+                element={
+                  <ClientOnly>
+                    <SemanticSearch />
+                  </ClientOnly>
+                }
+              />
+
               <Route
                 path="/recommendations"
                 element={<Recommendations />}
               />
 
-              {/* AI ASSISTANT */}
               <Route
                 path="/assistant"
                 element={
@@ -226,7 +212,6 @@ function App() {
                 }
               />
 
-              {/* ADMIN USER MANAGEMENT */}
               <Route
                 path="/admin/users"
                 element={<AdminUsers />}
