@@ -1,248 +1,1628 @@
-"""NLP/TALN analysis of a food question, with no LLM: spaCy, PhraseMatcher, difflib, TF-IDF + logistic regression."""
+"""
+
+EatHealthy - French NLP / TALN for food questions.
+
+Pipeline:
+
+1. spaCy tokenization and lemmatization
+
+2. PhraseMatcher entity recognition
+
+3. difflib typo correction
+
+4. TF-IDF + Logistic Regression intent classification
+
+5. Rule-based numeric filters, ranking and negation detection
+
+Compatible with:
+
+- backend/nlp_data/intents_aliments.json
+
+- backend/services/nl2sparql.py
+
+No LLM API required.
+
+"""
 
 import json
+
 import random
+
 import re
+
 import unicodedata
+
 from difflib import get_close_matches
+
 from pathlib import Path
 
 import spacy
+
 from sklearn.feature_extraction.text import TfidfVectorizer
+
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import GroupKFold, cross_val_score
+
+from sklearn.model_selection import GroupKFold, cross_val_score, cross_val_predict
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+
 from sklearn.pipeline import make_pipeline, make_union
+
 from spacy.matcher import PhraseMatcher
+
+from spacy.tokens import Span
+
 from spacy.util import filter_spans
 
+# ============================================================
+# 1. CONFIGURATION
+# ============================================================
 SPACY_MODEL = "fr_core_news_sm"
-INTENTS_FILE = Path(__file__).resolve().parents[1] / "nlp_data" / "intents_aliments.json"
-TOOLS = ["spaCy fr_core_news_sm", "scikit-learn TF-IDF + LogisticRegression", "difflib", "rdflib"]
 
-# Entity type -> token of the delexicalized text.
-MASKS = {"FOOD": "ent_food", "CATEGORY": "ent_cat", "IMPACT": "ent_impact",
-         "ATTRIBUTE": "ent_attr", "DIET": "ent_diet", "LEVEL": "ent_level", "MEAL": "ent_meal"}
+INTENTS_FILE = (
 
-# Fixed vocabulary (the foods and the meal names come from Fuseki): (text, type, ontology ID or level).
-VOCABULARY = [
-    ("fruit", "CATEGORY", "Fruit"), ("légume", "CATEGORY", "Legume"), ("céréale", "CATEGORY", "Cereale"),
-    ("viande", "CATEGORY", "Viande"), ("poisson", "CATEGORY", "Poisson"),
-    ("produit laitier", "CATEGORY", "ProduitLaitier"), ("produits laitiers", "CATEGORY", "ProduitLaitier"),
-    ("laitage", "CATEGORY", "ProduitLaitier"),
-    ("carbone", "IMPACT", "EmpreinteCarbone"), ("co2", "IMPACT", "EmpreinteCarbone"),
-    ("émission", "IMPACT", "EmpreinteCarbone"), ("polluer", "IMPACT", "EmpreinteCarbone"),
-    ("polluant", "IMPACT", "EmpreinteCarbone"), ("pollution", "IMPACT", "EmpreinteCarbone"),
-    ("gaz à effet de serre", "IMPACT", "EmpreinteCarbone"), ("climat", "IMPACT", "EmpreinteCarbone"),
-    ("eau", "IMPACT", "EmpreinteEau"), ("litre", "IMPACT", "EmpreinteEau"), ("water", "IMPACT", "EmpreinteEau"),
-    ("calorie", "ATTRIBUTE", "aCalories"), ("kcal", "ATTRIBUTE", "aCalories"), ("énergie", "ATTRIBUTE", "aCalories"),
-    ("calorique", "ATTRIBUTE", "aCalories"), ("prix", "ATTRIBUTE", "prixMoyen"), ("coûter", "ATTRIBUTE", "prixMoyen"),
-    ("cher", "ATTRIBUTE", "prixMoyen"), ("euro", "ATTRIBUTE", "prixMoyen"), ("price", "ATTRIBUTE", "prixMoyen"),
-    ("bio", "ATTRIBUTE", "estBio"), ("biologique", "ATTRIBUTE", "estBio"), ("organic", "ATTRIBUTE", "estBio"),
-    ("local", "ATTRIBUTE", "estLocal"), ("localement", "ATTRIBUTE", "estLocal"),
-    ("végan", "DIET", "Vegan"), ("vegan", "DIET", "Vegan"), ("végétalien", "DIET", "Vegan"),
-    ("végétarien", "DIET", "Vegetarien"), ("omnivore", "DIET", "Omnivore"),
-    ("faible", "LEVEL", "low"), ("bas", "LEVEL", "low"), ("fort", "LEVEL", "high"), ("élevé", "LEVEL", "high"),
-    ("durable", "LEVEL", "sustainable"), ("écologique", "LEVEL", "sustainable"), ("sustainable", "LEVEL", "sustainable"),
-    ("glucide", "ATTRIBUTE", "aGlucides"), ("carb", "ATTRIBUTE", "aGlucides"), ("carbs", "ATTRIBUTE", "aGlucides"),
-    ("protéine", "ATTRIBUTE", "aProteines"), ("lipide", "ATTRIBUTE", "aLipides"), ("graisse", "ATTRIBUTE", "aLipides"),
-    ("fibre", "ATTRIBUTE", "aFibres"), ("sucre", "ATTRIBUTE", "aSucre"), ("sodium", "ATTRIBUTE", "aSodium"),
-    ("sel", "ATTRIBUTE", "aSodium"),
-    ("repas", "MEAL", "Repas"), ("meal", "MEAL", "Repas"), ("petit-déjeuner", "MEAL", "PetitDejeuner"),
-    ("petit déjeuner", "MEAL", "PetitDejeuner"), ("breakfast", "MEAL", "PetitDejeuner"),
-    ("déjeuner", "MEAL", "Dejeuner"), ("lunch", "MEAL", "Dejeuner"), ("dîner", "MEAL", "Diner"),
-    ("dinner", "MEAL", "Diner"), ("collation", "MEAL", "Collation"), ("goûter", "MEAL", "Collation"),
-    ("snack", "MEAL", "Collation"),
+    Path(__file__).resolve().parents[1]
+
+    / "nlp_data"
+
+    / "intents_aliments.json"
+
+)
+
+TOOLS = [
+
+    "spaCy fr_core_news_sm",
+
+    "scikit-learn TF-IDF + LogisticRegression",
+
+    "difflib",
+
+    "rdflib",
+
 ]
-# Values used for the placeholders of the training phrases (they are masked again, so the names don't matter).
-EXAMPLE_FOODS = ["pomme", "banane", "brocoli", "lentilles", "pain blanc", "poulet", "saumon", "bœuf", "fromage", "lait"]
-EXAMPLES = {"{CAT}": ["fruits", "légumes", "céréales", "viandes", "poissons", "produits laitiers"],
-            "{IMPACT}": ["carbone", "CO2", "eau", "émissions"], "{ATTR}": ["calories", "kcal", "prix", "glucides", "protéines"],
-            "{DIET}": ["végans", "végétariens", "omnivores"], "{NUM}": ["2", "10", "50", "100", "300"],
-            "{MEAL}": ["déjeuner", "dîner", "petit-déjeuner", "collation", "repas"]}
 
-DOMAIN_WORDS = {"aliment", "nourriture", "manger", "produit", "plat", "food"}
-# intent -> (entity type, how many are needed)
-REQUIRED = {"value": ("FOOD", 1), "yes_no": ("FOOD", 1), "details": ("FOOD", 1), "compare": ("FOOD", 2),
-            "meal_total": ("MEAL", 1), "meal_foods": ("MEAL", 1)}
-NUMERIC = {"EmpreinteCarbone", "EmpreinteEau", "aCalories", "prixMoyen",
-           "aGlucides", "aProteines", "aLipides", "aFibres", "aSucre", "aSodium"}
-LESS = {"moins", "inferieur", "sous", "max", "maximum"}
-MORE = {"plus", "superieur", "depasser", "min", "minimum"}
-SMALL = {"petit", "faible", "bas"}
+MASKS = {
+
+    "FOOD": "ent_food",
+
+    "CATEGORY": "ent_cat",
+
+    "IMPACT": "ent_impact",
+
+    "ATTRIBUTE": "ent_attr",
+
+    "DIET": "ent_diet",
+
+    "LEVEL": "ent_level",
+
+    "MEAL": "ent_meal",
+
+}
+
+VOCABULARY = [
+
+    # Food categories
+    ("fruit", "CATEGORY", "Fruit"),
+
+    ("légume", "CATEGORY", "Legume"),
+
+    ("céréale", "CATEGORY", "Cereale"),
+
+    ("viande", "CATEGORY", "Viande"),
+
+    ("poisson", "CATEGORY", "Poisson"),
+
+    ("produit laitier", "CATEGORY", "ProduitLaitier"),
+
+    ("produits laitiers", "CATEGORY", "ProduitLaitier"),
+
+    ("laitage", "CATEGORY", "ProduitLaitier"),
+
+    # Environmental impacts
+    ("carbone", "IMPACT", "EmpreinteCarbone"),
+
+    ("co2", "IMPACT", "EmpreinteCarbone"),
+
+    ("émission", "IMPACT", "EmpreinteCarbone"),
+
+    ("polluer", "IMPACT", "EmpreinteCarbone"),
+
+    ("polluant", "IMPACT", "EmpreinteCarbone"),
+
+    ("pollution", "IMPACT", "EmpreinteCarbone"),
+
+    ("gaz à effet de serre", "IMPACT", "EmpreinteCarbone"),
+
+    ("climat", "IMPACT", "EmpreinteCarbone"),
+
+    ("empreinte carbone", "IMPACT", "EmpreinteCarbone"),
+
+    ("eau", "IMPACT", "EmpreinteEau"),
+
+    ("litre", "IMPACT", "EmpreinteEau"),
+
+    ("water", "IMPACT", "EmpreinteEau"),
+
+    ("empreinte eau", "IMPACT", "EmpreinteEau"),
+
+    # Numeric attributes
+    ("calorie", "ATTRIBUTE", "aCalories"),
+
+    ("kcal", "ATTRIBUTE", "aCalories"),
+
+    ("énergie", "ATTRIBUTE", "aCalories"),
+
+    ("calorique", "ATTRIBUTE", "aCalories"),
+
+    ("prix", "ATTRIBUTE", "prixMoyen"),
+
+    ("coûter", "ATTRIBUTE", "prixMoyen"),
+
+    ("cher", "ATTRIBUTE", "prixMoyen"),
+
+    ("euro", "ATTRIBUTE", "prixMoyen"),
+
+    ("price", "ATTRIBUTE", "prixMoyen"),
+
+    ("glucide", "ATTRIBUTE", "aGlucides"),
+
+    ("carb", "ATTRIBUTE", "aGlucides"),
+
+    ("carbs", "ATTRIBUTE", "aGlucides"),
+
+    ("protéine", "ATTRIBUTE", "aProteines"),
+
+    ("lipide", "ATTRIBUTE", "aLipides"),
+
+    ("graisse", "ATTRIBUTE", "aLipides"),
+
+    ("fibre", "ATTRIBUTE", "aFibres"),
+
+    ("sucre", "ATTRIBUTE", "aSucre"),
+
+    ("sodium", "ATTRIBUTE", "aSodium"),
+
+    ("sel", "ATTRIBUTE", "aSodium"),
+
+    # Boolean attributes
+    ("bio", "ATTRIBUTE", "estBio"),
+
+    ("biologique", "ATTRIBUTE", "estBio"),
+
+    ("organic", "ATTRIBUTE", "estBio"),
+
+    ("local", "ATTRIBUTE", "estLocal"),
+
+    ("localement", "ATTRIBUTE", "estLocal"),
+
+    # Diets
+    ("végan", "DIET", "Vegan"),
+
+    ("vegan", "DIET", "Vegan"),
+
+    ("végétalien", "DIET", "Vegan"),
+
+    ("végétarien", "DIET", "Vegetarien"),
+
+    ("omnivore", "DIET", "Omnivore"),
+
+    # Levels
+    ("faible", "LEVEL", "low"),
+
+    ("bas", "LEVEL", "low"),
+
+    ("fort", "LEVEL", "high"),
+
+    ("élevé", "LEVEL", "high"),
+
+    ("durable", "LEVEL", "sustainable"),
+
+    ("écologique", "LEVEL", "sustainable"),
+
+    ("sustainable", "LEVEL", "sustainable"),
+
+    # Meals
+    ("repas", "MEAL", "Repas"),
+
+    ("meal", "MEAL", "Repas"),
+
+    ("petit-déjeuner", "MEAL", "PetitDejeuner"),
+
+    ("petit déjeuner", "MEAL", "PetitDejeuner"),
+
+    ("breakfast", "MEAL", "PetitDejeuner"),
+
+    ("déjeuner", "MEAL", "Dejeuner"),
+
+    ("lunch", "MEAL", "Dejeuner"),
+
+    ("dîner", "MEAL", "Diner"),
+
+    ("dinner", "MEAL", "Diner"),
+
+    ("collation", "MEAL", "Collation"),
+
+    ("goûter", "MEAL", "Collation"),
+
+    ("snack", "MEAL", "Collation"),
+
+]
+
+EXAMPLE_FOODS = [
+
+    "pomme",
+
+    "banane",
+
+    "brocoli",
+
+    "lentilles",
+
+    "pain blanc",
+
+    "poulet",
+
+    "saumon",
+
+    "bœuf",
+
+    "fromage",
+
+    "lait",
+
+]
+
+EXAMPLES = {
+
+    "{CAT}": [
+
+        "fruits",
+
+        "légumes",
+
+        "céréales",
+
+        "viandes",
+
+        "poissons",
+
+        "produits laitiers",
+
+    ],
+
+    "{IMPACT}": [
+
+        "carbone",
+
+        "CO2",
+
+        "eau",
+
+        "émissions",
+
+    ],
+
+    "{ATTR}": [
+
+        "calories",
+
+        "kcal",
+
+        "prix",
+
+        "glucides",
+
+        "protéines",
+
+        "fibres",
+
+    ],
+
+    "{DIET}": [
+
+        "végans",
+
+        "végétariens",
+
+        "omnivores",
+
+    ],
+
+    "{NUM}": ["2", "10", "50", "100", "300"],
+
+    "{MEAL}": [
+
+        "déjeuner",
+
+        "dîner",
+
+        "petit-déjeuner",
+
+        "collation",
+
+        "repas",
+
+    ],
+
+}
+
+DOMAIN_WORDS = {
+
+    "aliment",
+
+    "nourriture",
+
+    "manger",
+
+    "produit",
+
+    "plat",
+
+    "food",
+
+}
+
+REQUIRED = {
+
+    "value": ("FOOD", 1),
+
+    "yes_no": ("FOOD", 1),
+
+    "details": ("FOOD", 1),
+
+    "compare": ("FOOD", 2),
+
+    "meal_total": ("MEAL", 1),
+
+    "meal_foods": ("MEAL", 1),
+
+}
+
+NUMERIC = {
+
+    "EmpreinteCarbone",
+
+    "EmpreinteEau",
+
+    "aCalories",
+
+    "prixMoyen",
+
+    "aGlucides",
+
+    "aProteines",
+
+    "aLipides",
+
+    "aFibres",
+
+    "aSucre",
+
+    "aSodium",
+
+}
+
 NEGATIONS = {"pas", "non", "sans", "ne"}
-NUMBER = r"\d+([.,]\d+)?"
 
+NUMBER = r"\d+(?:[.,]\d+)?"
 
+# ============================================================
+# 2. NORMALIZATION
+# ============================================================
 def normalize(text: str) -> str:
-    """Lowercase, œ -> oe, no accents."""
-    text = text.lower().replace("œ", "oe")
-    return "".join(c for c in unicodedata.normalize("NFD", text) if unicodedata.category(c) != "Mn")
 
+    """Lowercase, normalize ligatures and remove accents."""
 
+    text = text.lower()
+
+    text = text.replace("œ", "oe").replace("æ", "ae")
+
+    return "".join(
+
+        char
+
+        for char in unicodedata.normalize("NFD", text)
+
+        if unicodedata.category(char) != "Mn"
+
+    )
+
+# ============================================================
+# 3. NLP CLASS
+# ============================================================
 class NlpAliments:
-    """Question -> tokens, entities, delexicalized text, intent and slots."""
+
+    """Analyze a food question and return intent, entities and slots."""
 
     def __init__(self):
-        self.nlp = spacy.load(SPACY_MODEL, disable=["parser", "ner"])
-        self.foods: list[tuple[str, str]] = []
-        self.set_vocabulary([(f, f) for f in EXAMPLE_FOODS])   # only to read the training phrases
-        self.texts, self.labels, self.groups = self.training_set()
-        self.classifier = make_pipeline(
-            make_union(TfidfVectorizer(analyzer="word", ngram_range=(1, 2), sublinear_tf=True),
-                       TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 5), sublinear_tf=True)),
-            LogisticRegression(C=10, max_iter=3000))
-        self.classifier.fit(self.texts, self.labels)
-        self.foods = []   # the real foods are loaded from Fuseki by set_vocabulary()
 
-    # ---------------------------------------------------------------- 1. spaCy analysis
+        self.nlp = spacy.load(
+
+            SPACY_MODEL,
+
+            disable=["parser", "ner"],
+
+        )
+
+        self.foods = []
+
+        # Temporary vocabulary for training phrases.
+        self.set_vocabulary(
+
+            [(food, food) for food in EXAMPLE_FOODS]
+
+        )
+
+        self.texts, self.labels, self.groups = (
+
+            self.training_set()
+
+        )
+
+        self.classifier = make_pipeline(
+
+            make_union(
+
+                TfidfVectorizer(
+
+                    analyzer="word",
+
+                    ngram_range=(1, 2),
+
+                    sublinear_tf=True,
+
+                ),
+
+                TfidfVectorizer(
+
+                    analyzer="char_wb",
+
+                    ngram_range=(2, 5),
+
+                    sublinear_tf=True,
+
+                ),
+
+            ),
+
+            LogisticRegression(
+
+                C=10,
+
+                max_iter=3000,
+
+            ),
+
+        )
+
+        self.classifier.fit(
+
+            self.texts,
+
+            self.labels,
+
+        )
+
+        # Force vocabulary refresh from Fuseki.
+        self.foods = []
+
+    # ========================================================
+    # 4. SPACY PARSING
+    # ========================================================
     def parse(self, text: str):
-        """Tokens, lemmas and POS; token.norm_ = normalized lemma (the text for proper nouns)."""
+
+        """Tokenize and normalize the text."""
+
         doc = self.nlp(text)
+
         for token in doc:
-            token.norm_ = normalize(token.text if token.pos_ == "PROPN" else token.lemma_)
+
+            source = (
+
+                token.text
+
+                if token.pos_ == "PROPN"
+
+                else token.lemma_
+
+            )
+
+            token.norm_ = normalize(source)
+
         return doc
 
-    # ---------------------------------------------------------------- 2. entities (PhraseMatcher + difflib)
-    def set_vocabulary(self, foods: list[tuple[str, str]], meals: list[tuple[str, str]] = ()) -> None:
-        """Rebuild the PhraseMatcher with the fixed vocabulary, the foods and the meal names (label, ontology ID)."""
-        self.foods = sorted(set(foods))
-        self.matcher = PhraseMatcher(self.nlp.vocab, attr="NORM")
-        self.single_words = {}   # normalized word -> matcher key, for typos
-        terms = VOCABULARY + [(label, "FOOD", food_id) for label, food_id in self.foods] + \
-            [(label, "MEAL", meal_id) for label, meal_id in sorted(set(meals))]
-        for text, kind, ident in terms:
-            key = f"{kind}|{ident}"
-            variants = {text, text.lower(), text + "s", text[:-1] if text.endswith("s") else text}
-            patterns = [self.parse(v) for v in variants]
-            self.matcher.add(key, patterns)
-            for p in patterns:
-                if len(p) == 1 and len(p[0].norm_) >= 4:
-                    self.single_words.setdefault(p[0].norm_, key)
+    # ========================================================
+    # 5. VOCABULARY AND PHRASE MATCHER
+    # ========================================================
+    def set_vocabulary(
 
-    def entities(self, doc) -> list[dict]:
-        spans = []
-        for match_id, start, end in self.matcher(doc):
-            spans.append(doc[start:end])
-            spans[-1].label_ = self.nlp.vocab.strings[match_id]
-        spans = filter_spans(spans)
-        covered = {i for s in spans for i in range(s.start, s.end)}
-        found = [(s, False) for s in spans]
-        for token in doc:   # a word that matches nothing: maybe a typo ("pome" -> pomme)
-            if token.i in covered or token.is_stop or len(token.norm_) < 4 or token.pos_ not in ("NOUN", "ADJ", "PROPN", "VERB", "X"):
+        self,
+
+        foods: list[tuple[str, str]],
+
+        meals: list[tuple[str, str]] = (),
+
+    ) -> None:
+
+        self.foods = sorted(set(foods))
+
+        self.matcher = PhraseMatcher(
+
+            self.nlp.vocab,
+
+            attr="NORM",
+
+        )
+
+        self.single_words = {}
+
+        terms = (
+
+            VOCABULARY
+
+            + [
+
+                (label, "FOOD", food_id)
+
+                for label, food_id in self.foods
+
+            ]
+
+            + [
+
+                (label, "MEAL", meal_id)
+
+                for label, meal_id in sorted(set(meals))
+
+            ]
+
+        )
+
+        for text, kind, ident in terms:
+
+            if not text or not ident:
+
                 continue
-            close = get_close_matches(token.norm_, self.single_words, n=1, cutoff=0.8) or \
-                get_close_matches(normalize(token.text), self.single_words, n=1, cutoff=0.8)
-            if close:
-                span = doc[token.i:token.i + 1]
-                span.label_ = self.single_words[close[0]]
-                found.append((span, True))
+
+            key = f"{kind}|{ident}"
+
+            variants = {
+
+                text,
+
+                text.lower(),
+
+                text + "s",
+
+                text[:-1] if text.endswith("s") else text,
+
+            }
+
+            patterns = [
+
+                self.parse(variant)
+
+                for variant in variants
+
+                if variant.strip()
+
+            ]
+
+            self.matcher.add(key, patterns)
+
+            for pattern in patterns:
+
+                if (
+
+                    len(pattern) == 1
+
+                    and len(pattern[0].norm_) >= 4
+
+                ):
+
+                    self.single_words.setdefault(
+
+                        pattern[0].norm_,
+
+                        key,
+
+                    )
+
+    # ========================================================
+    # 6. ENTITY RECOGNITION
+    # ========================================================
+    def entities(self, doc) -> list[dict]:
+
+        """Recognize entities and correct simple spelling mistakes."""
+
+        spans = []
+
+        for match_id, start, end in self.matcher(doc):
+
+            key = self.nlp.vocab.strings[match_id]
+
+            spans.append(
+
+                Span(
+
+                    doc,
+
+                    start,
+
+                    end,
+
+                    label=key,
+
+                )
+
+            )
+
+        spans = filter_spans(spans)
+
+        covered = {
+
+            index
+
+            for span in spans
+
+            for index in range(span.start, span.end)
+
+        }
+
+        found = [
+
+            (span, False)
+
+            for span in spans
+
+        ]
+
+        for token in doc:
+
+            if token.i in covered:
+
+                continue
+
+            if token.is_stop or len(token.norm_) < 4:
+
+                continue
+
+            if token.pos_ not in {
+
+                "NOUN", "ADJ", "PROPN", "VERB", "X"
+
+            }:
+
+                continue
+
+            matches = get_close_matches(
+
+                token.norm_,
+
+                self.single_words.keys(),
+
+                n=1,
+
+                cutoff=0.85,
+
+            )
+
+            if not matches:
+
+                matches = get_close_matches(
+
+                    normalize(token.text),
+
+                    self.single_words.keys(),
+
+                    n=1,
+
+                    cutoff=0.85,
+
+                )
+
+            if not matches:
+
+                continue
+
+            key = self.single_words[matches[0]]
+
+            span = Span(
+
+                doc,
+
+                token.i,
+
+                token.i + 1,
+
+                label=key,
+
+            )
+
+            found.append((span, True))
+
+            covered.add(token.i)
+
         result = []
-        for span, corrected in sorted(found, key=lambda x: x[0].start):
+
+        for span, corrected in sorted(
+
+            found,
+
+            key=lambda item: item[0].start,
+
+        ):
+
             kind, ident = span.label_.split("|", 1)
-            if kind == "LEVEL" and span.start > 0 and doc[span.start - 1].norm_ in ("plus", "moins"):
-                continue   # "la plus faible" is a superlative, not a level
-            result.append({"text": span.text, "type": kind, "id": ident, "corrected": corrected,
-                           "start": span.start, "end": span.end})
+
+            # "La plus faible" is a superlative.
+            if kind == "LEVEL" and span.start > 0:
+
+                previous = doc[span.start - 1].norm_
+
+                if previous in {"plus", "moins"}:
+
+                    continue
+
+            result.append({
+
+                "text": span.text,
+
+                "type": kind,
+
+                "id": ident,
+
+                "corrected": corrected,
+
+                "start": span.start,
+
+                "end": span.end,
+
+            })
+
         return result
 
-    # ---------------------------------------------------------------- 3. delexicalization
+    # ========================================================
+    # 7. DELEXICALIZATION
+    # ========================================================
     @staticmethod
+
     def masked(doc, entities: list[dict]) -> str:
-        """Each entity becomes its type token, each number becomes ent_num."""
-        by_start = {e["start"]: e for e in entities}
-        words, i = [], 0
-        while i < len(doc):
-            if i in by_start:
-                words.append(MASKS[by_start[i]["type"]])
-                i = by_start[i]["end"]
+
+        """Replace entities and numbers with generic tokens."""
+
+        by_start = {
+
+            entity["start"]: entity
+
+            for entity in entities
+
+        }
+
+        words = []
+
+        index = 0
+
+        while index < len(doc):
+
+            if index in by_start:
+
+                entity = by_start[index]
+
+                words.append(
+
+                    MASKS[entity["type"]]
+
+                )
+
+                index = entity["end"]
+
                 continue
-            if not doc[i].is_punct:
-                words.append("ent_num" if re.fullmatch(NUMBER, doc[i].text) else doc[i].norm_)
-            i += 1
+
+            token = doc[index]
+
+            if not token.is_punct:
+
+                if re.fullmatch(NUMBER, token.text):
+
+                    words.append("ent_num")
+
+                else:
+
+                    words.append(token.norm_)
+
+            index += 1
+
         return " ".join(words)
 
-    # ---------------------------------------------------------------- 4. intent classifier (scikit-learn)
+    # ========================================================
+    # 8. TRAINING DATASET
+    # ========================================================
     def training_set(self):
-        """Training phrases with the placeholders filled (3 versions each), then delexicalized."""
-        intents = json.loads(INTENTS_FILE.read_text(encoding="utf-8"))["intents"]
+
+        """Load training phrases and generate masked examples."""
+
+        if not INTENTS_FILE.is_file():
+
+            raise FileNotFoundError(
+
+                f"Training dataset not found: {INTENTS_FILE}"
+
+            )
+
+        data = json.loads(
+
+            INTENTS_FILE.read_text(encoding="utf-8")
+
+        )
+
+        intents = data["intents"]
+
         rng = random.Random(42)
-        texts, labels, groups = [], [], []
+
+        texts = []
+
+        labels = []
+
+        groups = []
+
         for intent, phrases in intents.items():
-            for n, phrase in enumerate(phrases):
-                for _ in range(3 if "{" in phrase else 1):
-                    food, food2 = rng.sample(EXAMPLE_FOODS, 2)
-                    text = phrase.replace("{FOOD}", food).replace("{FOOD2}", food2)
+
+            for index, phrase in enumerate(phrases):
+
+                repetitions = 3 if "{" in phrase else 1
+
+                for _ in range(repetitions):
+
+                    food, food2 = rng.sample(
+
+                        EXAMPLE_FOODS,
+
+                        2,
+
+                    )
+
+                    text = (
+
+                        phrase
+
+                        .replace("{FOOD}", food)
+
+                        .replace("{FOOD2}", food2)
+
+                    )
+
                     for holder, values in EXAMPLES.items():
-                        text = text.replace(holder, rng.choice(values))
+
+                        text = text.replace(
+
+                            holder,
+
+                            rng.choice(values),
+
+                        )
+
                     doc = self.parse(text)
-                    texts.append(self.masked(doc, self.entities(doc)))
+
+                    entities = self.entities(doc)
+
+                    texts.append(
+
+                        self.masked(doc, entities)
+
+                    )
+
                     labels.append(intent)
-                    groups.append(f"{intent}#{n}")   # a phrase and its copies stay in the same fold
+
+                    groups.append(
+
+                        f"{intent}#{index}"
+
+                    )
+
         return texts, labels, groups
 
+    # ========================================================
+    # 9. CROSS VALIDATION
+    # ========================================================
     def cross_validation(self) -> float:
-        """Grouped 5-fold accuracy of the classifier on the training phrases."""
-        scores = cross_val_score(self.classifier, self.texts, self.labels, groups=self.groups, cv=GroupKFold(5))
+
+        """Grouped 5-fold cross-validation accuracy."""
+
+        scores = cross_val_score(
+
+            self.classifier,
+
+            self.texts,
+
+            self.labels,
+
+            groups=self.groups,
+
+            cv=GroupKFold(n_splits=5),
+
+        )
+
         return float(scores.mean())
 
-    # ---------------------------------------------------------------- 5. slots (rules on the lemmas)
-    @staticmethod
-    def slots(doc, entities: list[dict]) -> dict:
-        norms = [t.norm_ for t in doc]
-        measures = [e for e in entities if e["id"] in NUMERIC]
-        numbers, limit, used = [], None, set()
-        for t in doc:
-            if not re.fullmatch(NUMBER, t.text):
-                continue
-            number = float(t.text.replace(",", "."))
-            before = norms[max(0, t.i - 3):t.i]
-            if before and before[-1] in ("top", "le", "les"):
-                limit = int(number)
-                continue
-            op = "<" if LESS & set(before) else ">" if MORE & set(before) else None
-            if op:
-                used.update(range(max(0, t.i - 3), t.i))
-                near = min(measures, key=lambda e: abs(e["start"] - t.i), default=None)
-                numbers.append({"op": op, "value": number, "measure": near["id"] if near else "EmpreinteCarbone"})
-        order = None
-        for i, word in enumerate(norms):
-            if i in used:
-                continue
-            if word in ("plus", "moins", "maximum", "minimum", "top", "croissant", "decroissant"):
-                order = "ASC" if word in ("moins", "minimum", "croissant") else "DESC"
-                if word in ("plus", "moins") and i + 1 < len(norms) and norms[i + 1] in SMALL:
-                    order = "ASC"
-                break
-        return {"numbers": numbers, "order": order, "limit": limit,
-                "negation": bool(NEGATIONS & set(norms)),
-                "yes_no": bool(re.search(r"\b(est|sont)-(il|elle|ils|elles|ce)\b|\best-ce\b", doc.text.lower()))}
-
-    # ---------------------------------------------------------------- 6. full analysis and intent choice
-    @staticmethod
-    def has_required(intent: str, entities: list[dict]) -> bool:
-        kind, needed = REQUIRED.get(intent, ("FOOD", 0))
-        return sum(e["type"] == kind for e in entities) >= needed
-
-    def analyse(self, question: str) -> dict:
-        doc = self.parse(question)
-        entities = self.entities(doc)
-        masked = self.masked(doc, entities)
-        probabilities = zip(map(str, self.classifier.classes_), map(float, self.classifier.predict_proba([masked])[0]))
-        ranking = sorted(probabilities, key=lambda x: -x[1])
-        top = [{"intent": i, "probability": round(p, 3)} for i, p in ranking[:3]]
-        in_domain = entities or DOMAIN_WORDS & {t.norm_ for t in doc}
-        intent = None
-        if in_domain and (entities or ranking[0][1] >= 0.35):
-            # the most probable intent whose required entities are present
-            intent = next((i for i, p in ranking[:3] if self.has_required(i, entities) and
-                           (i == ranking[0][0] or p >= 0.2)), None)
+    def evaluation_report(self) -> dict:
+        """Grouped 5-fold out-of-fold intent classification metrics."""
+        predictions = cross_val_predict(
+            self.classifier,
+            self.texts,
+            self.labels,
+            groups=self.groups,
+            cv=GroupKFold(n_splits=5),
+        )
+        labels = sorted(set(self.labels))
+        report = classification_report(
+            self.labels,
+            predictions,
+            labels=labels,
+            output_dict=True,
+            zero_division=0,
+        )
+        matrix = confusion_matrix(
+            self.labels,
+            predictions,
+            labels=labels,
+        )
         return {
-            "tokens": [{"text": t.text, "lemma": t.lemma_, "pos": t.pos_} for t in doc if not t.is_space],
+            "accuracy": float(accuracy_score(self.labels, predictions)),
+            "labels": labels,
+            "report": report,
+            "confusion_matrix": matrix.tolist(),
+        }
+
+    # ========================================================
+    # 10. NUMERIC FILTERS AND SLOTS
+    # ========================================================
+    @staticmethod
+
+    def slots(doc, entities: list[dict]) -> dict:
+
+        """
+
+        Extract:
+
+        - Numeric comparisons
+
+        - Ranking order
+
+        - Top-N limits
+
+        - Negation
+
+        - Yes/no question indicators
+
+        Output remains compatible with nl2sparql.py.
+
+        """
+
+        norms = [
+
+            token.norm_
+
+            for token in doc
+
+        ]
+
+        measures = [
+
+            entity
+
+            for entity in entities
+
+            if entity["id"] in NUMERIC
+
+        ]
+
+        numbers = []
+
+        limit = None
+
+        used = set()
+
+        # Match numeric comparisons in the original question.
+        # Supports:
+        #   moins de 100 calories
+        #   plus de 2 grammes de fibres
+        #   inférieur à 50 kcal
+        #   au moins 10 protéines
+        #   supérieur à 5
+        comparison_pattern = re.compile(
+
+            r"\b("
+
+            r"moins\s+de|"
+
+            r"plus\s+de|"
+
+            r"inferieur(?:e)?\s+a|"
+
+            r"superieur(?:e)?\s+a|"
+
+            r"au\s+moins|"
+
+            r"au\s+maximum|"
+
+            r"au\s+plus|"
+
+            r"minimum\s+de|"
+
+            r"maximum\s+de|"
+
+            r"sous|"
+
+            r"depassant"
+
+            r")\s+"
+
+            r"(\d+(?:[.,]\d+)?)\b",
+
+            re.IGNORECASE,
+
+        )
+
+        normalized_question = normalize(doc.text)
+
+        # Character positions remain aligned for accent removal
+        # in most French text, but token-based parsing below is
+        # used for the actual measure association.
+        for match in comparison_pattern.finditer(
+
+            normalized_question
+
+        ):
+
+            phrase = match.group(1)
+
+            numeric_text = match.group(2)
+
+            value = float(
+
+                numeric_text.replace(",", ".")
+
+            )
+
+            if phrase.startswith((
+
+                "moins",
+
+                "inferieur",
+
+                "sous",
+
+                "au plus",
+
+                "au maximum",
+
+                "maximum",
+
+            )):
+
+                op = "<=" if phrase.startswith((
+
+                    "au plus",
+
+                    "au maximum",
+
+                    "maximum",
+
+                )) else "<"
+
+            elif phrase.startswith((
+
+                "au moins",
+
+                "minimum",
+
+            )):
+
+                op = ">="
+
+            else:
+
+                op = ">"
+
+            # Find the corresponding numeric token.
+            token_index = None
+
+            for token in doc:
+
+                if (
+
+                    re.fullmatch(NUMBER, token.text)
+
+                    and abs(
+
+                        token.idx - match.start(2)
+
+                    ) <= 3
+
+                ):
+
+                    token_index = token.i
+
+                    break
+
+            if token_index is None:
+
+                continue
+
+            # Prefer a measurement appearing after the number,
+            # provided it belongs to the same comparison clause.
+            next_comparison = comparison_pattern.search(
+
+                normalized_question,
+
+                match.end(),
+
+            )
+
+            clause_end = (
+
+                next_comparison.start()
+
+                if next_comparison
+
+                else len(normalized_question)
+
+            )
+
+            candidates_after = [
+
+                entity
+
+                for entity in measures
+
+                if (
+
+                    entity["start"] > token_index
+
+                    and doc[
+
+                        entity["start"]
+
+                    ].idx < clause_end
+
+                )
+
+            ]
+
+            candidates_before = [
+
+                entity
+
+                for entity in measures
+
+                if entity["end"] <= token_index
+
+            ]
+
+            selected = None
+
+            if candidates_after:
+
+                selected = min(
+
+                    candidates_after,
+
+                    key=lambda entity: (
+
+                        entity["start"] - token_index
+
+                    ),
+
+                )
+
+            elif candidates_before:
+
+                selected = min(
+
+                    candidates_before,
+
+                    key=lambda entity: (
+
+                        token_index - entity["end"]
+
+                    ),
+
+                )
+
+            # Do not silently interpret an unknown measurement
+            # as carbon footprint.
+            if selected is None:
+
+                continue
+
+            numbers.append({
+
+                "op": op,
+
+                "value": value,
+
+                "measure": selected["id"],
+
+            })
+
+            used.add(token_index)
+
+        # Top-N detection
+        top_match = re.search(
+
+            r"\btop\s+(\d+)\b",
+
+            normalized_question,
+
+        )
+
+        if top_match:
+
+            limit = max(
+
+                1,
+
+                min(int(top_match.group(1)), 50),
+
+            )
+
+        else:
+
+            count_match = re.search(
+
+                r"\b(?:les|des)\s+(\d+)\s+aliments\b",
+
+                normalized_question,
+
+            )
+
+            if count_match:
+
+                limit = max(
+
+                    1,
+
+                    min(int(count_match.group(1)), 50),
+
+                )
+
+        # Sorting
+        order = None
+
+        ascending_patterns = [
+
+            r"\bmoins\s+cher\b",
+
+            r"\bmoins\s+polluant\b",
+
+            r"\bmoins\s+calorique\b",
+
+            r"\bplus\s+faible\b",
+
+            r"\bplus\s+petit\b",
+
+            r"\bminimum\b",
+
+            r"\bminimal\b",
+
+            r"\bcroissant\b",
+
+            r"\bdu\s+moins\b",
+
+        ]
+
+        descending_patterns = [
+
+            r"\bplus\s+cher\b",
+
+            r"\bplus\s+polluant\b",
+
+            r"\bplus\s+calorique\b",
+
+            r"\bplus\s+gros\b",
+
+            r"\bplus\s+grand\b",
+
+            r"\bplus\s+haut\b",
+
+            r"\bmaximum\b",
+
+            r"\bmaximal\b",
+
+            r"\bdecroissant\b",
+
+            r"\bdu\s+plus\b",
+
+        ]
+
+        for pattern in ascending_patterns:
+
+            if re.search(pattern, normalized_question):
+
+                order = "ASC"
+
+                break
+
+        if order is None:
+
+            for pattern in descending_patterns:
+
+                if re.search(
+
+                    pattern,
+
+                    normalized_question,
+
+                ):
+
+                    order = "DESC"
+
+                    break
+
+        # For rankings, the default is descending.
+        if (
+
+            order is None
+
+            and re.search(
+
+                r"\b(top|classement|classe|trie|range)\b",
+
+                normalized_question,
+
+            )
+
+        ):
+
+            order = "DESC"
+
+        negation = bool(
+
+            NEGATIONS & set(norms)
+
+        )
+
+        yes_no = bool(
+
+            re.search(
+
+                r"\b(est|sont)-(il|elle|ils|elles|ce)\b"
+
+                r"|\best-ce\b"
+
+                r"|\bpeut-on\b",
+
+                doc.text.lower(),
+
+            )
+
+        )
+
+        return {
+
+            "numbers": numbers,
+
+            "order": order,
+
+            "limit": limit,
+
+            "negation": negation,
+
+            "yes_no": yes_no,
+
+        }
+
+    # ========================================================
+    # 11. REQUIRED ENTITIES
+    # ========================================================
+    @staticmethod
+
+    def has_required(
+
+        intent: str,
+
+        entities: list[dict],
+
+    ) -> bool:
+
+        kind, needed = REQUIRED.get(
+
+            intent,
+
+            ("FOOD", 0),
+
+        )
+
+        unique_entities = {
+
+            entity["id"]
+
+            for entity in entities
+
+            if entity["type"] == kind
+
+        }
+
+        return len(unique_entities) >= needed
+
+    # ========================================================
+    # 12. FULL ANALYSIS
+    # ========================================================
+    def analyse(self, question: str) -> dict:
+
+        """Analyze the question and return a structured result."""
+
+        question = question.strip()
+
+        if not question:
+
+            raise ValueError(
+
+                "La question ne peut pas être vide."
+
+            )
+
+        doc = self.parse(question)
+
+        entities = self.entities(doc)
+
+        masked = self.masked(
+
+            doc,
+
+            entities,
+
+        )
+
+        probabilities = self.classifier.predict_proba(
+
+            [masked]
+
+        )[0]
+
+        ranking = sorted(
+
+            zip(
+
+                map(str, self.classifier.classes_),
+
+                map(float, probabilities),
+
+            ),
+
+            key=lambda item: -item[1],
+
+        )
+
+        top = [
+
+            {
+
+                "intent": intent,
+
+                "probability": round(probability, 3),
+
+            }
+
+            for intent, probability in ranking[:3]
+
+        ]
+
+        in_domain = bool(
+
+            entities
+
+            or DOMAIN_WORDS.intersection(
+
+                token.norm_
+
+                for token in doc
+
+            )
+
+        )
+
+        intent = None
+
+        if in_domain and (
+
+            entities or ranking[0][1] >= 0.35
+
+        ):
+
+            intent = next(
+
+                (
+
+                    candidate
+
+                    for candidate, probability in ranking[:3]
+
+                    if (
+
+                        self.has_required(
+
+                            candidate,
+
+                            entities,
+
+                        )
+
+                        and (
+
+                            candidate == ranking[0][0]
+
+                            or probability >= 0.2
+
+                        )
+
+                    )
+
+                ),
+
+                None,
+
+            )
+
+        # Explicit ranking phrases with a number
+        # should use ranking rather than extreme.
+        slots = self.slots(
+
+            doc,
+
+            entities,
+
+        )
+
+        if (
+
+            slots["limit"] is not None
+
+            and intent == "extreme"
+
+        ):
+
+            intent = "ranking"
+
+        # Preserve the existing response contract.
+        confidence = (
+
+            dict(ranking).get(intent, ranking[0][1])
+
+        )
+
+        return {
+
+            "tokens": [
+
+                {
+
+                    "text": token.text,
+
+                    "lemma": token.lemma_,
+
+                    "pos": token.pos_,
+
+                }
+
+                for token in doc
+
+                if not token.is_space
+
+            ],
+
             "entities": entities,
+
             "masked": masked,
+
             "intent": intent,
-            "confidence": round(dict(ranking)[intent or ranking[0][0]], 3),
+
+            "confidence": round(confidence, 3),
+
             "top_intents": top,
-            "slots": self.slots(doc, entities),
+
+            "slots": slots,
+
             "tools": TOOLS,
+
         }

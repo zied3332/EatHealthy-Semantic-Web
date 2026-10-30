@@ -1,10 +1,38 @@
+
 import { NavLink, Outlet } from "react-router-dom";
-import { Leaf } from "lucide-react";
+import { BrainCircuit, HeartPulse, Leaf } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { useAuth } from "../../context/AuthContext";
 import { navigation } from "./AppLayout";
 import "./ClientLayout.css";
+
+// ============================================================
+// CLIENT NAVIGATION
+// ============================================================
+
+const clientNavigation = [
+  ...navigation.filter(
+    (item) =>
+      item.path !== "/admin/users" &&
+      item.path !== "/health-preferences" &&
+      item.path !== "/semantic-search"
+  ),
+  {
+    label: "My Health Preferences",
+    path: "/health-preferences",
+    icon: HeartPulse,
+  },
+  {
+    label: "Semantic AI Search",
+    path: "/semantic-search",
+    icon: BrainCircuit,
+  },
+];
+
+// ============================================================
+// CLIENT LAYOUT
+// ============================================================
 
 export default function ClientLayout({
   children,
@@ -21,16 +49,22 @@ export default function ClientLayout({
           <span>EatHealthy</span>
         </NavLink>
 
-        <nav className="client-navigation" aria-label="Client navigation">
-          {navigation.map((item) => {
+        <nav
+          className="client-navigation"
+          aria-label="Client navigation"
+        >
+          {clientNavigation.map((item) => {
             const Icon = item.icon;
+
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
                 end={item.path === "/"}
                 className={({ isActive }) =>
-                  `client-navigation-link ${isActive ? "active" : ""}`
+                  `client-navigation-link ${
+                    isActive ? "active" : ""
+                  }`
                 }
               >
                 <Icon size={17} />
@@ -41,7 +75,10 @@ export default function ClientLayout({
         </nav>
 
         <div className="client-account">
-          <span>{user?.username}</span>
+          <span className="client-username">
+            {user?.username}
+          </span>
+
           <button type="button" onClick={logout}>
             Sign out
           </button>

@@ -1,0 +1,265 @@
+
+.health-preferences-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 0 40px;
+}
+
+.health-preferences-heading {
+  margin-bottom: 28px;
+}
+
+.health-preferences-eyebrow {
+  color: #23834a;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+}
+
+.health-preferences-heading h1 {
+  margin: 10px 0;
+  color: #1d5f36;
+  font-size: clamp(28px, 4vw, 38px);
+}
+
+.health-preferences-heading p {
+  color: #718078;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.health-preferences-card {
+  padding: 30px;
+  background: #fff;
+  border: 1px solid #e0ebe1;
+  border-radius: 20px;
+  box-shadow: 0 14px 36px rgb(34 80 46 / 6%);
+}
+
+.health-preferences-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.health-preferences-card-title {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.health-preferences-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  color: #23834a;
+  background: #e9f7ed;
+  border-radius: 15px;
+}
+
+.health-preferences-card-title h2 {
+  margin: 0 0 5px;
+  color: #1d5f36;
+  font-size: 21px;
+}
+
+.health-preferences-card-title p {
+  margin: 0;
+  color: #718078;
+  font-size: 13px;
+}
+
+.health-preferences-status {
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: #f1f4f1;
+  color: #718078;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.health-preferences-status.configured {
+  color: #23834a;
+  background: #e9f7ed;
+}
+
+.health-preferences-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.health-preferences-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #405a46;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.health-preferences-fields select {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 14px;
+  border: 1px solid #d4e2d6;
+  border-radius: 10px;
+  background: #fbfdfb;
+  color: #2d4735;
+  font-size: 15px;
+  outline: none;
+  cursor: pointer;
+}
+
+.health-preferences-fields select:focus {
+  border-color: #23834a;
+  box-shadow: 0 0 0 3px rgb(35 131 74 / 12%);
+}
+
+.health-preferences-fields select:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.health-preferences-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.health-preferences-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 23px;
+  border: 1px solid #e0ebe1;
+  border-radius: 14px;
+  background: #f6faf6;
+}
+
+.health-preferences-summary-item svg {
+  color: #23834a;
+}
+
+.health-preferences-summary-item span {
+  color: #718078;
+  font-size: 12px;
+}
+
+.health-preferences-summary-item strong {
+  color: #1d5f36;
+  font-size: 17px;
+}
+
+.health-preferences-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid #edf2ed;
+}
+
+.health-preferences-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.health-preferences-save {
+  border: 1px solid #23834a;
+  color: #fff;
+  background: #23834a;
+}
+
+.health-preferences-save:hover:not(:disabled) {
+  background: #176c3a;
+}
+
+.health-preferences-delete {
+  border: 1px solid #efd0d0;
+  color: #b33d3d;
+  background: #fff7f7;
+}
+
+.health-preferences-delete:hover:not(:disabled) {
+  background: #ffebeb;
+}
+
+.health-preferences-refresh {
+  border: 1px solid #d4e2d6;
+  color: #496c53;
+  background: #fff;
+}
+
+.health-preferences-refresh:hover:not(:disabled) {
+  background: #f0f7f1;
+}
+
+.health-preferences-actions button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.health-preferences-alert {
+  padding: 13px 16px;
+  margin-bottom: 22px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.health-preferences-alert.success {
+  color: #206b3b;
+  background: #e9f7ed;
+  border: 1px solid #c8e8d1;
+}
+
+.health-preferences-alert.error {
+  color: #a03535;
+  background: #fff1f1;
+  border: 1px solid #f1cdcd;
+}
+
+.health-preferences-loading {
+  color: #718078;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .health-preferences-card {
+    padding: 20px;
+  }
+
+  .health-preferences-card-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .health-preferences-fields,
+  .health-preferences-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .health-preferences-actions {
+    flex-direction: column;
+  }
+
+  .health-preferences-actions button {
+    width: 100%;
+  }
+}
