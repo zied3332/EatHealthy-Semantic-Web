@@ -10,6 +10,9 @@ Modules:
     - Diets: Dietary regimes from the OWL ontology.
     - Profile: User profiles, health goals, and activity profiles.
     - Recommendations: Personalized food recommendations using SPARQL.
+    - Users: Authentication and account management.
+    - Health Preferences: Health objectives and dietary regimes CRUD.
+    - Impacts, Nutrients, Meals: Nutrition and environmental data.
 """
 
 from pathlib import Path
@@ -18,8 +21,18 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Load backend/.env (API keys) before the routers are imported.
+
+# ============================================================
+# ENVIRONMENT CONFIGURATION
+# ============================================================
+
+# Load backend/.env before importing application routers.
 load_dotenv(Path(__file__).resolve().parent / ".env")
+
+
+# ============================================================
+# IMPORT ROUTERS
+# ============================================================
 
 from backend.routers import (
     foods,
@@ -27,8 +40,11 @@ from backend.routers import (
     profile,
     recommendations,
     users,
+    impacts,
+    meals,
+    nutrients,
+    health_preferences,
 )
-from backend.routers import impacts, meals, nutrients
 
 
 # ============================================================
@@ -61,7 +77,14 @@ app.add_middleware(
         "http://127.0.0.1:5174",
     ],
     allow_credentials=False,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=[
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS",
+    ],
     allow_headers=["*"],
 )
 
@@ -85,10 +108,14 @@ app.include_router(recommendations.router)
 # Authentication and user management.
 app.include_router(users.router)
 
-# Environmental impacts of foods (module "Gestion des aliments").
+# Environmental impacts, nutrients, and meals.
 app.include_router(impacts.router)
 app.include_router(nutrients.router)
 app.include_router(meals.router)
+
+# Health objectives and dietary regimes CRUD.
+# Supports authenticated clients and administrators.
+app.include_router(health_preferences.router)
 
 
 # ============================================================
@@ -110,5 +137,10 @@ def home():
             "diets",
             "profile",
             "recommendations",
+            "users",
+            "health_preferences",
+            "impacts",
+            "nutrients",
+            "meals",
         ],
     }
